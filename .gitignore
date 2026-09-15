@@ -1,0 +1,33 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+.venv/
+venv/
+
+# Build and test output
+dist/
+build/
+coverage/
+.coverage
+.pytest_cache/
+__pycache__/
+*.py[cod]
+
+# Logs and runtime files
+*.log
+*.pid
+
+# IDE and operating system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local databases
+*.sqlite
+*.sqlite3
+*.db
