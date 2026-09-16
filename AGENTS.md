@@ -1,33 +1,51 @@
-# Repository Guidelines
+# Taler — правила проекта
 
-## Project Structure & Module Organization
+## Стек
 
-This repository begins with the product specification in `project_fullstack_app.md`. The planned deliverable is a personal-finance tracker with a REST API, responsive client, and PostgreSQL or SQLite storage. Keep components in top-level directories such as `frontend/`, `backend/`, and `database/` (or backend migrations). Place tests beside covered code or in each component's `tests/`. Store CI workflows in `.github/workflows/` and container definitions at the root.
+- Backend: NestJS + Prisma + PostgreSQL.
+- Frontend: React + Vite + TypeScript + MUI + Recharts.
+- Тесты: Jest + Supertest (backend), Vitest + Testing Library (frontend).
+- Инфраструктура: Docker Compose и GitHub Actions.
+- Дополнительные библиотеки и причины их выбора описаны в `docs/TECH_STACK.md`.
 
-Maintain `ARCHITECTURE.md` before implementation, `README.md` for setup, and `REPORT.md` throughout development to record decisions and lessons learned.
+## Структура проекта
 
-## Build, Test, and Development Commands
+- Backend размещать в `backend/`, frontend — в `frontend/`, проектную документацию — в `docs/`.
+- Схему, миграции и seed-скрипты Prisma хранить в `backend/prisma/`.
+- Тесты располагать рядом с проверяемым кодом либо в стандартных каталогах соответствующего приложения.
+- Docker Compose хранить в корне, CI workflows — в `.github/workflows/`.
+- `ARCHITECTURE.md` поддерживать в актуальном состоянии до и во время реализации. В `README.md` документировать запуск, миграции, seed, lint и тесты.
+- Не изменять `REPORT.md` без явной просьбы владельца проекта.
 
-The stack is not scaffolded yet, so do not assume a package manager or framework. Once selected, document exact commands in `README.md` and expose consistent root-level scripts. The required end-to-end entry point is:
+## Стиль
 
-```sh
-docker compose up
-```
+- Всегда использовать TypeScript strict mode.
+- Не использовать `any`; для неизвестных значений применять `unknown` с явным narrowing.
+- Использовать настройки ESLint и Prettier проекта. Для JSON и YAML применять отступ в два пробела.
+- Именовать типы и React-компоненты в `PascalCase`, функции и переменные — в `camelCase`, URL-маршруты — в `kebab-case`.
+- Разделять DTO, серверную валидацию, бизнес-логику и модели базы данных.
+- Коммиты оформлять в формате Conventional Commits, например `feat(api): add transaction filters`.
+- Никогда не менять схему Prisma без миграции.
 
-This must start the frontend, backend, and database with realistic seed data. Also document commands for linting, tests, migrations, and seeding; CI must run lint and tests.
+## Рабочий процесс
 
-## Coding Style & Naming Conventions
+- Перед коммитом запускать `npm run lint && npm run test` из корня проекта.
+- Новые API-эндпоинты обязательно покрывать Supertest-тестом.
+- Prisma-миграции именовать по шаблону `add_<field>_to_<table>`; для других изменений использовать такое же короткое описание в `snake_case`, например `create_audit_log`.
+- `docker compose up` должен запускать frontend, backend и PostgreSQL с реалистичными seed-данными.
+- При изменении API обновлять DTO, Swagger/OpenAPI и клиентские типы.
+- Делать небольшие тематические коммиты; не включать несвязанные пользовательские изменения.
+- Политика запуска команд Codex находится в `.codex/rules/default.rules`; не обходить её и не выполнять force push.
 
-Use the chosen language's standard formatter and linter, commit their configuration, and run them before review. Prefer two-space indentation for JSON/YAML and formatter defaults elsewhere. Use descriptive English names: `PascalCase` for types/components, `camelCase` for functions and variables, and `kebab-case` for route paths. Keep API DTOs, validation, and database models separate.
+## Тестирование
 
-## Testing Guidelines
+- Поддерживать не менее 10 unit- и integration-тестов.
+- Проверять CRUD-валидацию, изоляцию пользовательских данных, фильтрацию и пагинацию, CSV import/export, бюджеты, повторяющиеся транзакции, валюты и аудит.
+- Тесты должны быть детерминированными и самостоятельно создавать либо сбрасывать свои данные.
+- Называть тесты по наблюдаемому поведению, например `rejects transactions owned by another user`.
 
-Provide at least 10 unit or integration tests. Cover CRUD validation, user data isolation, filters and pagination, CSV import/export, budgets, recurring transactions, currency handling, and audit logging. Name tests after observable behavior (for example, `rejects transactions owned by another user`). Tests must be deterministic and create or reset their own data.
+## Безопасность и конфигурация
 
-## Commit & Pull Request Guidelines
-
-There is no existing commit history to infer a convention from. Use short, imperative, scoped messages such as `feat(api): add transaction filters` or `test(auth): verify tenant isolation`. Keep commits focused and build the project incrementally. Pull requests should explain the change, testing performed, configuration or migration impact, and linked issue. Include screenshots for dashboard or responsive UI changes and update API documentation when endpoints change.
-
-## Security & Configuration
-
-Never commit secrets or production credentials. Provide `.env.example`, validate required settings at startup, hash passwords, and enforce JWT authorization and per-user ownership on every protected API operation.
+- Не коммитить секреты и `.env`; поддерживать актуальный `.env.example`.
+- Проверять обязательные переменные окружения при запуске.
+- Хешировать пароли, проверять JWT и ограничивать каждую защищённую операцию данными текущего пользователя.

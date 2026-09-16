@@ -1,0 +1,46 @@
+# Разрешить безопасные git-команды только для чтения без подтверждения.
+prefix_rule(
+    pattern = ["git", ["status", "diff", "log"]],
+    decision = "allow",
+    justification = "Read-only Git inspection",
+)
+
+# Учесть обязательный safe.directory для команд в этом репозитории.
+prefix_rule(
+    pattern = ["git", "-c", "safe.directory=D:/Otus_ai/Project/Taler", ["status", "diff", "log"]],
+    decision = "allow",
+    justification = "Read-only Git inspection for this repository",
+)
+
+# Блокировать типовые рекурсивные удаления.
+prefix_rule(
+    pattern = ["rm", ["-rf", "-fr"]],
+    decision = "forbidden",
+    justification = "Remove only explicit, verified paths and prefer recoverable deletion",
+)
+
+prefix_rule(
+    pattern = ["Remove-Item", ["-Recurse", "-r"], ["-Force", "-fo"]],
+    decision = "forbidden",
+    justification = "Remove only explicit, verified paths and prefer recoverable deletion",
+)
+
+# Блокировать распространённые формы force push.
+prefix_rule(
+    pattern = ["git", "push", ["--force", "-f", "--force-with-lease"]],
+    decision = "forbidden",
+    justification = "Force push can rewrite shared history; create a normal follow-up commit instead",
+)
+
+prefix_rule(
+    pattern = ["git", "-c", "safe.directory=D:/Otus_ai/Project/Taler", "push", ["--force", "-f", "--force-with-lease"]],
+    decision = "forbidden",
+    justification = "Force push can rewrite shared history; create a normal follow-up commit instead",
+)
+
+# Остановка Docker Compose требует явного подтверждения.
+prefix_rule(
+    pattern = ["docker", "compose", "down"],
+    decision = "prompt",
+    justification = "Stops project containers; confirm intent first",
+)
