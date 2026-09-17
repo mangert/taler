@@ -21,6 +21,9 @@ __pycache__/
 *.log
 *.pid
 
+# Temporary files
+/tmp/
+
 # IDE and operating system files
 .idea/
 .vscode/
