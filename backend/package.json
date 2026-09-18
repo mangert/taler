@@ -18,7 +18,9 @@
     "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "test:cov": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage --runInBand",
     "test:debug": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
-    "test:e2e": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.config.cjs --runInBand"
+    "test:e2e": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.config.cjs --runInBand",
+    "format:check": "prettier --check . --ignore-unknown",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@nestjs/common": "12.0.3",

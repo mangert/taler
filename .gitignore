@@ -35,3 +35,8 @@ Thumbs.db
 *.sqlite3
 *.db
 *.tsbuildinfo
+
+# Browser test output
+playwright-report/
+test-results/
+blob-report/
