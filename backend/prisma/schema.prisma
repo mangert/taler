@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum AuditableEntityType {
+  TRANSACTION
+  BUDGET
+}
+
+model User {
+  id             String                 @id @default(uuid()) @db.Uuid
+  email          String                 @unique @db.VarChar(320)
+  passwordHash   String
+  displayName    String                 @db.VarChar(120)
+  baseCurrency   String                 @db.VarChar(3)
+  timeZone       String                 @db.VarChar(100)
+  createdAt      DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime               @updatedAt @db.Timestamptz(3)
+  categories     Category[]
+  transactions   Transaction[]
+  budgets        Budget[]
+  recurringRules RecurringTransaction[]
+  auditLogs      AuditLog[]
+}
+
+model Category {
+  id             String                 @id @default(uuid()) @db.Uuid
+  userId         String                 @db.Uuid
+  name           String                 @db.VarChar(100)
+  icon           String                 @db.VarChar(80)
+  color          String                 @db.VarChar(9)
+  type           TransactionType
+  createdAt      DateTime               @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime               @updatedAt @db.Timestamptz(3)
+  user           User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions   Transaction[]
+  budgets        Budget[]
+  recurringRules RecurringTransaction[]
+
+  @@unique([userId, name])
+  @@index([userId, type])
+}
+
+model Transaction {
+  id                     String                @id @default(uuid()) @db.Uuid
+  userId                 String                @db.Uuid
+  categoryId             String                @db.Uuid
+  type                   TransactionType
+  amount                 Decimal               @db.Decimal(19, 4)
+  currency               String                @db.VarChar(3)
+  exchangeRateToBase     Decimal               @db.Decimal(20, 8)
+  baseAmount             Decimal               @db.Decimal(19, 4)
+  transactionDate        DateTime              @db.Date
+  description            String?               @db.VarChar(500)
+  recurringTransactionId String?               @db.Uuid
+  scheduledDate          DateTime?             @db.Date
+  createdAt              DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt              DateTime              @updatedAt @db.Timestamptz(3)
+  user                   User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category               Category              @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  recurringTransaction   RecurringTransaction? @relation(fields: [recurringTransactionId], references: [id], onDelete: SetNull)
+
+  @@unique([recurringTransactionId, scheduledDate])
+  @@index([userId, transactionDate, id])
+  @@index([userId, categoryId, transactionDate])
+}
+
+model Budget {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  categoryId  String   @db.Uuid
+  month       DateTime @db.Date
+  limitAmount Decimal  @db.Decimal(19, 4)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, categoryId, month])
+  @@index([userId, month])
+}
+
+model RecurringTransaction {
+  id                 String          @id @default(uuid()) @db.Uuid
+  userId             String          @db.Uuid
+  categoryId         String          @db.Uuid
+  type               TransactionType
+  amount             Decimal         @db.Decimal(19, 4)
+  currency           String          @db.VarChar(3)
+  exchangeRateToBase Decimal         @db.Decimal(20, 8)
+  description        String?         @db.VarChar(500)
+  dayOfMonth         Int
+  startDate          DateTime        @db.Date
+  endDate            DateTime?       @db.Date
+  nextRunAt          DateTime        @db.Timestamptz(3)
+  isActive           Boolean         @default(true)
+  createdAt          DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime        @updatedAt @db.Timestamptz(3)
+  user               User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category           Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  transactions       Transaction[]
+
+  @@index([userId, isActive, nextRunAt])
+}
+
+model AuditLog {
+  id         String              @id @default(uuid()) @db.Uuid
+  userId     String              @db.Uuid
+  entityType AuditableEntityType
+  entityId   String              @db.Uuid
+  action     AuditAction
+  before     Json?               @db.JsonB
+  after      Json?               @db.JsonB
+  createdAt  DateTime            @default(now()) @db.Timestamptz(3)
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt, id])
+  @@index([userId, entityType, entityId])
+}

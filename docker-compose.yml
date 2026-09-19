@@ -1,0 +1,77 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: taler_dev
+      POSTGRES_USER: taler_dev
+      POSTGRES_PASSWORD: local_dev_only
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+
+  db-init:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: db-init
+    environment:
+      DATABASE_URL: postgresql://taler_dev:local_dev_only@postgres:5432/taler_dev?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: production
+    environment:
+      DATABASE_URL: postgresql://taler_dev:local_dev_only@postgres:5432/taler_dev?schema=public
+      JWT_SECRET: ${JWT_SECRET:-compose-local-secret-at-least-32-characters}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:5173}
+      PORT: 3000
+      CSV_MAX_FILE_SIZE_BYTES: ${CSV_MAX_FILE_SIZE_BYTES:-5242880}
+      CSV_MAX_ROWS: ${CSV_MAX_ROWS:-10000}
+    ports:
+      - '3000:3000'
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:3000/api/v1/health').then((response) => {
+          if (!response.ok) process.exit(1); }).catch(() => process.exit(1));
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: production
+    ports:
+      - '5173:80'
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

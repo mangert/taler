@@ -111,6 +111,8 @@ npx playwright install chromium
 
 ### 2.4. Compose-сценарий
 
+> **Изменение порядка выполнения:** перед приёмкой пункта 2.4 досрочно выполнить пункты 3.1–3.3 и Swagger bootstrap из пункта 4.2. Это необходимо, потому что `db-init` зависит от готовых Prisma schema, миграции и идемпотентного seed, а критерий запуска одной командой требует доступного Swagger UI. После подготовки prerequisites вернуться к шагам 2.4 и проверить их в исходном порядке.
+
 - Описать сервисы postgres, db-init, backend и frontend.
 - В db-init выполнять prisma migrate deploy и явный prisma db seed; Prisma Client генерировать при сборке backend image.
 - Запускать backend после успешного db-init, frontend — после healthy backend.
