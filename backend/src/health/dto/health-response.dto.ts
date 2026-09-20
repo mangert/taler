@@ -4,13 +4,13 @@ export class HealthChecksDto {
   @ApiProperty({ example: 'up', enum: ['up'] })
   process!: 'up';
 
-  @ApiProperty({ example: 'up', enum: ['up', 'down'] })
-  database!: 'up' | 'down';
+  @ApiProperty({ example: 'up', enum: ['up'] })
+  database!: 'up';
 }
 
 export class HealthResponseDto {
-  @ApiProperty({ example: 'ok', enum: ['ok', 'error'] })
-  status!: 'ok' | 'error';
+  @ApiProperty({ example: 'ok', enum: ['ok'] })
+  status!: 'ok';
 
   @ApiProperty({ type: HealthChecksDto })
   checks!: HealthChecksDto;

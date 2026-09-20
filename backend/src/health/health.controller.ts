@@ -6,18 +6,19 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { ApiErrorResponseDto } from '../common/errors/dto/api-error-response.dto.js';
 import { HealthResponseDto } from './dto/health-response.dto.js';
 import { HealthService } from './health.service.js';
 
 @ApiTags('health')
-@Controller('api/v1/health')
+@Controller('health')
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
   @Get()
   @ApiOperation({ summary: 'Check the process and database readiness' })
   @ApiOkResponse({ type: HealthResponseDto })
-  @ApiServiceUnavailableResponse({ type: HealthResponseDto })
+  @ApiServiceUnavailableResponse({ type: ApiErrorResponseDto })
   getHealth(): Promise<HealthResponseDto> {
     return this.healthService.getHealth();
   }

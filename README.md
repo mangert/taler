@@ -55,6 +55,13 @@ npm run test
 npm run typecheck
 npm run build
 npm run test:e2e --workspace=backend
+npm run test:data
 ```
+
+Команда `test:data` предназначена для проверки слоя данных: она пересоздаёт
+схему `public` только в выделенной базе `taler_test`, применяет миграции,
+выполняет seed и запускает integration-тесты. Пользовательский
+`TEST_DATABASE_URL` обязан оканчиваться на `_test` и не совпадать с
+`DATABASE_URL`.
 
 Архитектура описана в [ARCHITECTURE.md](ARCHITECTURE.md), подробный план — в [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).

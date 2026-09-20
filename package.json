@@ -30,7 +30,8 @@
     "test": "npm run test --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
     "e2e": "npm run test:e2e --workspace=backend \u0026\u0026 playwright test",
-    "db:test:clean": "node --env-file-if-exists=.env --import tsx backend/test/database/clean-test-database.ts"
+    "db:test:clean": "node --env-file-if-exists=.env --import tsx backend/test/database/clean-test-database.ts",
+    "test:data": "node --env-file-if-exists=.env --import tsx backend/test/database/run-data-integration.ts"
   },
   "allowScripts": {
     "@parcel/watcher@2.6.0": true,

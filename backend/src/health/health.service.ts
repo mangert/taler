@@ -25,13 +25,10 @@ export class HealthService {
       };
     } catch {
       throw new ServiceUnavailableException({
-        status: 'error',
-        checks: {
-          process: 'up',
-          database: 'down',
-        },
-        timestamp,
-      } satisfies HealthResponseDto);
+        code: 'DATABASE_UNAVAILABLE',
+        message: 'Database health check failed',
+        details: [],
+      });
     }
   }
 }

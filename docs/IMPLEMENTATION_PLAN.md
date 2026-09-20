@@ -165,6 +165,10 @@ npm exec --workspace=backend -- prisma db seed
 
 ### 3.4. Проверки слоя данных
 
+> **Статус:** выполнено 19 сентября 2026 года. Команда `npm run test:data`
+> пересоздаёт выделенную тестовую схему только из миграций, выполняет seed и
+> запускает integration-тесты.
+
 - Выполнить prisma validate, prisma generate и prisma migrate status.
 - Написать integration-тест количества seed-сущностей, диапазона дат и раздельного владения.
 - Проверить уникальности бюджета, категории и recurring occurrence.
@@ -174,6 +178,10 @@ npm exec --workspace=backend -- prisma db seed
 ## 4. Общая платформа backend и API-контракт
 
 ### 4.1. Bootstrap, конфигурация и ошибки
+
+> **Статус:** выполнено 19 сентября 2026 года. Bootstrap, валидация, единый
+> error shape, общие helpers и безопасное request logging подтверждены unit- и
+> Supertest-тестами.
 
 - Включить глобальный префикс /api/v1, cookie parser, Helmet и ограниченный CORS.
 - Настроить ValidationPipe с transform, whitelist и forbidNonWhitelisted.
