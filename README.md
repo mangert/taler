@@ -47,6 +47,21 @@ npm run start:dev --workspace=backend
 npm run dev --workspace=frontend
 ```
 
+## Клиентские типы API
+
+После запуска backend с доступным OpenAPI JSON сгенерируйте типы frontend:
+
+```bash
+npm run api:generate
+```
+
+Сгенерированный файл `frontend/src/shared/api/schema.d.ts` хранится в Git и
+не редактируется вручную. Проверить его соответствие текущему OpenAPI-контракту:
+
+```bash
+npm run api:check
+```
+
 ## Проверки
 
 ```bash

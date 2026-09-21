@@ -61,4 +61,13 @@ describe('common API helpers', () => {
     });
     expect(createPagination(1, 20, 0).meta.totalPages).toBe(0);
   });
+
+  it('rejects pagination values outside the centralized limits', () => {
+    expect(() => createPagination(0, 20, 0)).toThrow(
+      'page must be a positive integer',
+    );
+    expect(() => createPagination(1, 101, 0)).toThrow(
+      'pageSize must be an integer between 1 and 100',
+    );
+  });
 });

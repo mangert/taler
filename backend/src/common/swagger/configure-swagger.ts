@@ -11,6 +11,7 @@ export function configureSwagger(app: INestApplication): void {
       {
         type: 'apiKey',
         in: 'cookie',
+        description: 'HTTP-only JWT access token',
       },
       'cookieAuth',
     )

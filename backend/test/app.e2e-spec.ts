@@ -249,7 +249,11 @@ describe('AppController (e2e)', () => {
         '/api/v1/health': {
           get: {
             responses: {
+              200: {
+                description: 'Process and database are ready',
+              },
               503: {
+                description: 'Database health check failed',
                 content: {
                   'application/json': {
                     schema: {
@@ -263,6 +267,14 @@ describe('AppController (e2e)', () => {
         },
       },
       components: {
+        securitySchemes: {
+          cookieAuth: {
+            type: 'apiKey',
+            in: 'cookie',
+            name: 'access_token',
+            description: 'HTTP-only JWT access token',
+          },
+        },
         schemas: {
           ApiErrorResponseDto: {
             type: 'object',
@@ -270,12 +282,32 @@ describe('AppController (e2e)', () => {
               statusCode: expect.any(Object),
               code: expect.any(Object),
               message: expect.any(Object),
-              details: expect.any(Object),
+              details: {
+                type: 'array',
+                items: {},
+              },
+            },
+          },
+          HealthResponseDto: {
+            type: 'object',
+            required: ['status', 'checks', 'timestamp'],
+            properties: {
+              status: expect.any(Object),
+              checks: expect.any(Object),
+              timestamp: {
+                type: 'string',
+                format: 'date-time',
+                example: '2026-09-18T20:00:00.000Z',
+              },
             },
           },
         },
       },
     });
+    expect(
+      response.body.components.schemas.ApiErrorResponseDto.properties.details
+        .items,
+    ).toEqual({});
   });
 
   afterEach(async () => {

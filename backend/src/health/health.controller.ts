@@ -17,8 +17,14 @@ export class HealthController {
 
   @Get()
   @ApiOperation({ summary: 'Check the process and database readiness' })
-  @ApiOkResponse({ type: HealthResponseDto })
-  @ApiServiceUnavailableResponse({ type: ApiErrorResponseDto })
+  @ApiOkResponse({
+    description: 'Process and database are ready',
+    type: HealthResponseDto,
+  })
+  @ApiServiceUnavailableResponse({
+    description: 'Database health check failed',
+    type: ApiErrorResponseDto,
+  })
   getHealth(): Promise<HealthResponseDto> {
     return this.healthService.getHealth();
   }

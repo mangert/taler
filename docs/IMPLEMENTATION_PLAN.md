@@ -191,6 +191,11 @@ npm exec --workspace=backend -- prisma db seed
 
 ### 4.2. Swagger и клиентские типы
 
+> **Статус:** выполнено 20 сентября 2026 года. Swagger UI и OpenAPI JSON
+> покрыты Supertest smoke-тестом; frontend-типы генерируются из живого
+> контракта командой `npm run api:generate`, а `npm run api:check` обнаруживает
+> их рассинхронизацию.
+
 - Настроить Swagger UI по /api/docs и JSON по /api/docs-json.
 - Описать cookie JWT security scheme, DTO, query parameters, ответы и ошибки.
 - Добавить frontend script api:generate на основе openapi-typescript.
@@ -198,6 +203,11 @@ npm exec --workspace=backend -- prisma db seed
 - Добавить smoke-тест доступности Swagger UI и JSON.
 
 ### 4.3. Общие DTO и фильтры
+
+> **Статус:** выполнено 20 сентября 2026 года. Добавлены общие pagination DTO,
+> стабильные строковые enum, централизованные лимиты, детерминированная
+> сортировка, различение omitted/null и ownership-scoped Prisma filter builder
+> для транзакций.
 
 - Создать PaginationQueryDto, PaginatedMetaDto и стабильные string enums.
 - Централизовать максимальный pageSize 100 и детерминированную сортировку.

@@ -12,7 +12,8 @@ export class ApiErrorResponseDto {
 
   @ApiProperty({
     example: ['property userId should not exist'],
-    isArray: true,
+    type: 'array',
+    items: {},
   })
   details!: unknown[];
 }
