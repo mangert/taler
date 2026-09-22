@@ -42,6 +42,7 @@ npm ci
 ```bash
 npm run prisma:validate --workspace=backend
 npm run prisma:migrate --workspace=backend
+npm run prisma:generate --workspace=backend
 npm run prisma:seed --workspace=backend
 npm run start:dev --workspace=backend
 npm run dev --workspace=frontend
@@ -70,8 +71,15 @@ npm run test
 npm run typecheck
 npm run build
 npm run test:e2e --workspace=backend
+npm run e2e
 npm run test:data
 ```
+
+Корневая команда `npm run e2e` сначала запускает backend E2E, затем Playwright.
+Для браузерных сценариев требуется запущенный Docker daemon: Playwright поднимает
+полный Compose-стек, дожидается frontend `/healthz` и использует два
+демонстрационных аккаунта из seed. После локального запуска сервисы можно
+остановить без удаления данных командой `docker compose stop`.
 
 Команда `test:data` предназначена для проверки слоя данных: она пересоздаёт
 схему `public` только в выделенной базе `taler_test`, применяет миграции,

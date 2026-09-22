@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import {
   Body,
   Controller,
@@ -12,10 +11,8 @@ import { jest } from '@jest/globals';
 import { Type } from 'class-transformer';
 import { IsInt, IsString, Min } from 'class-validator';
 import request from 'supertest';
-import { AppModule } from './../src/app.module.js';
-import { configureApplication } from './../src/common/bootstrap/configure-application.js';
-import { configureSwagger } from './../src/common/swagger/configure-swagger.js';
 import { DatabaseHealthIndicator } from './../src/health/database-health.indicator.js';
+import { createTestApplication } from './support/create-test-application.js';
 
 class ValidationProbeDto {
   @IsString()
@@ -49,15 +46,10 @@ describe('AppController (e2e)', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+    app = await createTestApplication({
       controllers: [ValidationProbeController],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    configureApplication(app);
-    configureSwagger(app);
-    await app.init();
+      enableSwagger: true,
+    });
   });
 
   it('serves application routes only below the global API prefix', async () => {
@@ -201,20 +193,14 @@ describe('AppController (e2e)', () => {
   });
 
   it('reports an unavailable database without exposing its error', async () => {
-    const moduleFixture = await Test.createTestingModule({
-      imports: [AppModule],
-    })
-      .overrideProvider(DatabaseHealthIndicator)
-      .useValue({
-        check: jest
-          .fn<() => Promise<void>>()
-          .mockRejectedValue(new Error('private SQL error')),
-      })
-      .compile();
-
-    const unavailableApp = moduleFixture.createNestApplication();
-    configureApplication(unavailableApp);
-    await unavailableApp.init();
+    const unavailableApp = await createTestApplication({
+      configureModule: (moduleBuilder) =>
+        moduleBuilder.overrideProvider(DatabaseHealthIndicator).useValue({
+          check: jest
+            .fn<() => Promise<void>>()
+            .mockRejectedValue(new Error('private SQL error')),
+        }),
+    });
 
     try {
       const response = await request(unavailableApp.getHttpServer())

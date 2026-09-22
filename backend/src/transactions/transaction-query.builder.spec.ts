@@ -1,6 +1,6 @@
 import { SortDirection } from '../common/enums/sort-direction.enum.js';
-import type { Prisma } from '../../generated/prisma/client.js';
-import { TransactionType as PrismaTransactionType } from '../../generated/prisma/client.js';
+import type { Prisma } from '../generated/prisma/client.js';
+import { TransactionType as PrismaTransactionType } from '../generated/prisma/client.js';
 import { TransactionType } from './enums/transaction-type.enum.js';
 import {
   buildTransactionWhere,

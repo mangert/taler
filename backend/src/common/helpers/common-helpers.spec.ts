@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 
-import { Prisma } from '../../../generated/prisma/client.js';
+import { Prisma } from '../../generated/prisma/client.js';
 import {
   serializeDecimal,
   serializeIsoDate,

@@ -7,7 +7,7 @@ import {
   Prisma,
   PrismaClient,
   TransactionType,
-} from '../generated/prisma/client.js';
+} from '../src/generated/prisma/client.js';
 
 const databaseUrl = process.env.DATABASE_URL;
 
