@@ -6,6 +6,7 @@ import { AuthLayout } from '../features/auth/AuthLayout';
 import { AuthProvider } from '../features/auth/AuthProvider';
 import { ProtectedRoute } from '../features/auth/ProtectedRoute';
 import { HomePage } from '../pages/HomePage';
+import { CategoriesPage } from '../pages/CategoriesPage';
 import { LoginPage } from '../pages/LoginPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { RegisterPage } from '../pages/RegisterPage';
@@ -22,6 +23,7 @@ export function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/categories" element={<CategoriesPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

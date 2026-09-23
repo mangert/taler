@@ -105,6 +105,43 @@ export interface paths {
         patch: operations["UsersController_updateProfile"];
         trace?: never;
     };
+    "/api/v1/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List current user categories with optional name search */
+        get: operations["CategoriesController_list"];
+        put?: never;
+        /** Create a category for the current user */
+        post: operations["CategoriesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get an owned category */
+        get: operations["CategoriesController_get"];
+        put?: never;
+        post?: never;
+        /** Delete an unused owned category */
+        delete: operations["CategoriesController_remove"];
+        options?: never;
+        head?: never;
+        /** Update an owned category */
+        patch: operations["CategoriesController_update"];
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -196,6 +233,74 @@ export interface components {
             timeZone?: string;
             /** @example RUB */
             baseCurrency?: string;
+        };
+        CategoryResponseDto: {
+            /**
+             * Format: uuid
+             * @example 20000000-0000-4000-8000-000000000003
+             */
+            id: string;
+            /** @example Продукты */
+            name: string;
+            /** @example shopping_cart */
+            icon: string;
+            /** @example #2E7D32 */
+            color: string;
+            /**
+             * @example EXPENSE
+             * @enum {string}
+             */
+            type: "INCOME" | "EXPENSE";
+            /**
+             * Format: date-time
+             * @example 2026-09-22T10:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2026-09-22T10:00:00.000Z
+             */
+            updatedAt: string;
+        };
+        CategoryListMetaDto: {
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            pageSize: number;
+            /** @example 2 */
+            total: number;
+            /** @example 1 */
+            totalPages: number;
+        };
+        CategoryListResponseDto: {
+            items: components["schemas"]["CategoryResponseDto"][];
+            meta: components["schemas"]["CategoryListMetaDto"];
+        };
+        CreateCategoryDto: {
+            /** @example Продукты */
+            name: string;
+            /** @example shopping_cart */
+            icon: string;
+            /** @example #2E7D32 */
+            color: string;
+            /**
+             * @example EXPENSE
+             * @enum {string}
+             */
+            type: "INCOME" | "EXPENSE";
+        };
+        UpdateCategoryDto: {
+            /** @example Продукты */
+            name?: string;
+            /** @example shopping_cart */
+            icon?: string;
+            /** @example #2E7D32 */
+            color?: string;
+            /**
+             * @example EXPENSE
+             * @enum {string}
+             */
+            type?: "INCOME" | "EXPENSE";
         };
         HealthChecksDto: {
             /**
@@ -429,6 +534,244 @@ export interface operations {
                 };
             };
             /** @description Base currency cannot be changed after the first transaction */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CategoriesController_list: {
+        parameters: {
+            query?: {
+                search?: string;
+                page?: number;
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryListResponseDto"];
+                };
+            };
+            /** @description Invalid search or pagination */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Authentication is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CategoriesController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCategoryDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryResponseDto"];
+                };
+            };
+            /** @description Invalid category fields */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Authentication is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description CATEGORY_NAME_EXISTS: name already exists for this user */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CategoriesController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryResponseDto"];
+                };
+            };
+            /** @description Authentication is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Category missing or owned by another user */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CategoriesController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Category deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Category missing or owned by another user */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description CATEGORY_IN_USE: category is referenced by transactions, budgets or recurring rules */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    CategoriesController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCategoryDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryResponseDto"];
+                };
+            };
+            /** @description Invalid or empty update */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Authentication is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Category missing or owned by another user */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description CATEGORY_NAME_EXISTS: name already exists for this user */
             409: {
                 headers: {
                     [name: string]: unknown;

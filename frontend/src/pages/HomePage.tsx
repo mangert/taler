@@ -19,6 +19,9 @@ export function HomePage() {
           <Button component={Link} to="/profile" variant="contained">
             Открыть профиль
           </Button>
+          <Button component={Link} to="/categories" variant="outlined">
+            Категории
+          </Button>
           <Button
             variant="outlined"
             onClick={async () => {

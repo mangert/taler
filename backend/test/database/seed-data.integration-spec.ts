@@ -118,6 +118,23 @@ describe('seed data', () => {
     ).rejects.toMatchObject({ code: 'P2002' });
   });
 
+  it('rejects a category name that differs only by letter case', async () => {
+    const category = await prisma.category.findFirstOrThrow();
+
+    await expect(
+      prisma.category.create({
+        data: {
+          id: randomUUID(),
+          userId: category.userId,
+          name: category.name.toUpperCase(),
+          icon: category.icon,
+          color: category.color,
+          type: category.type,
+        },
+      }),
+    ).rejects.toMatchObject({ code: 'P2002' });
+  });
+
   it('rejects a duplicate budget for the same user, category and month', async () => {
     const budget = await prisma.budget.findFirstOrThrow();
 

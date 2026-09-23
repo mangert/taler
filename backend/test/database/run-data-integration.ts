@@ -10,15 +10,17 @@ const defaultDevelopmentDatabaseUrl =
   'postgresql://taler_dev:local_dev_only@localhost:5432/taler_dev?schema=public';
 const defaultTestDatabaseUrl =
   'postgresql://taler_test:local_test_only@localhost:5432/taler_test?schema=public';
+const developmentDatabaseUrl =
+  process.env.DATABASE_URL ?? defaultDevelopmentDatabaseUrl;
 const projectRoot = resolve(
   dirname(fileURLToPath(import.meta.url)),
   '../../..',
 );
 const testDatabaseUrl = assertDedicatedTestDatabaseUrl(
   process.env.TEST_DATABASE_URL ?? defaultTestDatabaseUrl,
-  process.env.DATABASE_URL ?? defaultDevelopmentDatabaseUrl,
+  developmentDatabaseUrl,
 );
-const childEnvironment = {
+const childEnvironment: NodeJS.ProcessEnv = {
   ...process.env,
   DATABASE_URL: testDatabaseUrl,
 };
@@ -27,12 +29,13 @@ const runNode = (
   label: string,
   arguments_: string[],
   workingDirectory = projectRoot,
+  environment = childEnvironment,
 ): void => {
   console.log(`\n> ${label}`);
 
   const result = spawnSync(process.execPath, arguments_, {
     cwd: workingDirectory,
-    env: childEnvironment,
+    env: environment,
     stdio: 'inherit',
   });
 
@@ -76,10 +79,19 @@ runNode(
   [prismaCli, 'db', 'seed', '--config', prismaConfig],
   resolve(projectRoot, 'backend'),
 );
-runNode('Run data integration tests', [
-  '--experimental-vm-modules',
-  resolve(projectRoot, 'node_modules/jest/bin/jest.js'),
-  '--config',
-  resolve(projectRoot, 'backend/test/jest-integration.config.cjs'),
-  '--runInBand',
-]);
+runNode(
+  'Run data integration tests',
+  [
+    '--experimental-vm-modules',
+    resolve(projectRoot, 'node_modules/jest/bin/jest.js'),
+    '--config',
+    resolve(projectRoot, 'backend/test/jest-integration.config.cjs'),
+    '--runInBand',
+  ],
+  projectRoot,
+  {
+    ...childEnvironment,
+    DATABASE_URL: developmentDatabaseUrl,
+    TEST_DATABASE_URL: testDatabaseUrl,
+  },
+);
