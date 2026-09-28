@@ -10,6 +10,7 @@ import { CategoriesPage } from '../pages/CategoriesPage';
 import { LoginPage } from '../pages/LoginPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { RegisterPage } from '../pages/RegisterPage';
+import { TransactionsPage } from '../pages/TransactionsPage';
 import { createAppQueryClient } from './query-client';
 import { appTheme } from './theme';
 
@@ -24,6 +25,7 @@ export function AppRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/categories" element={<CategoriesPage />} />
+        <Route path="/transactions" element={<TransactionsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

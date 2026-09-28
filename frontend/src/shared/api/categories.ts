@@ -25,6 +25,23 @@ export const categoriesApi = {
     if (params.search) query.set('search', params.search);
     return apiRequest<CategoryList>(`/api/v1/categories?${query.toString()}`);
   },
+  listAll: async (): Promise<Category[]> => {
+    const first = await categoriesApi.list({
+      search: '',
+      page: 1,
+      pageSize: 100,
+    });
+    const items = [...first.items];
+    for (let page = 2; page <= first.meta.totalPages; page += 1) {
+      const next = await categoriesApi.list({
+        search: '',
+        page,
+        pageSize: 100,
+      });
+      items.push(...next.items);
+    }
+    return items;
+  },
   create: (input: CreateCategoryInput): Promise<Category> =>
     apiRequest<Category>('/api/v1/categories', {
       method: 'POST',

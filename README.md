@@ -72,6 +72,7 @@ npm run typecheck
 npm run build
 npm run test:e2e --workspace=backend
 npm run e2e
+npm run e2e:ui
 npm run test:data
 ```
 
@@ -80,6 +81,10 @@ npm run test:data
 полный Compose-стек, дожидается frontend `/healthz` и использует два
 демонстрационных аккаунта из seed. После локального запуска сервисы можно
 остановить без удаления данных командой `docker compose stop`.
+
+`npm run e2e:ui` собирает frontend и проверяет CRUD-сценарий транзакции в
+desktop/mobile Chromium с изолированными ответами API. Docker для него не
+нужен; он дополняет, но не заменяет полный `npm run e2e` с PostgreSQL и backend.
 
 Команда `test:data` предназначена для проверки слоя данных: она пересоздаёт
 схему `public` только в выделенной базе `taler_test`, применяет миграции,

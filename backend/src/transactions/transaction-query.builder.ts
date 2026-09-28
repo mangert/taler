@@ -1,5 +1,5 @@
 import { SortDirection } from '../common/enums/sort-direction.enum.js';
-import { TransactionType } from './enums/transaction-type.enum.js';
+type TransactionType = 'INCOME' | 'EXPENSE';
 
 export interface TransactionFilters {
   search?: string;

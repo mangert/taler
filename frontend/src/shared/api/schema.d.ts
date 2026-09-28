@@ -142,6 +142,43 @@ export interface paths {
         patch: operations["CategoriesController_update"];
         trace?: never;
     };
+    "/api/v1/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List owned transactions with combinable filters */
+        get: operations["TransactionsController_list"];
+        put?: never;
+        /** Create a transaction and calculate its base amount */
+        post: operations["TransactionsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transactions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get an owned transaction */
+        get: operations["TransactionsController_get"];
+        put?: never;
+        post?: never;
+        /** Delete an owned transaction */
+        delete: operations["TransactionsController_remove"];
+        options?: never;
+        head?: never;
+        /** Update an owned transaction and recalculate its base amount */
+        patch: operations["TransactionsController_update"];
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -301,6 +338,77 @@ export interface components {
              * @enum {string}
              */
             type?: "INCOME" | "EXPENSE";
+        };
+        TransactionResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            categoryId: string;
+            /** @enum {string} */
+            type: "INCOME" | "EXPENSE";
+            /** @example 12.3456 */
+            amount: string;
+            /** @example EUR */
+            currency: string;
+            /** @example 1.00000000 */
+            exchangeRateToBase: string;
+            /** @example 12.3456 */
+            baseAmount: string;
+            /** Format: date */
+            transactionDate: string;
+            description: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        TransactionListMetaDto: {
+            page: number;
+            pageSize: number;
+            total: number;
+            totalPages: number;
+        };
+        TransactionListResponseDto: {
+            items: components["schemas"]["TransactionResponseDto"][];
+            meta: components["schemas"]["TransactionListMetaDto"];
+        };
+        CreateTransactionDto: {
+            /** Format: uuid */
+            categoryId: string;
+            /** @enum {string} */
+            type: "INCOME" | "EXPENSE";
+            /** @example 12.3456 */
+            amount: string;
+            /** @example EUR */
+            currency: string;
+            /** @example 1.00000000 */
+            exchangeRateToBase: string;
+            /**
+             * Format: date
+             * @example 2026-09-01
+             */
+            transactionDate: string;
+            /** @example Coffee */
+            description?: string | null;
+        };
+        UpdateTransactionDto: {
+            /** Format: uuid */
+            categoryId?: string;
+            /** @enum {string} */
+            type?: "INCOME" | "EXPENSE";
+            /** @example 12.3456 */
+            amount?: string;
+            /** @example EUR */
+            currency?: string;
+            /** @example 1.00000000 */
+            exchangeRateToBase?: string;
+            /**
+             * Format: date
+             * @example 2026-09-01
+             */
+            transactionDate?: string;
+            /** @example Coffee */
+            description?: string | null;
         };
         HealthChecksDto: {
             /**
@@ -773,6 +881,220 @@ export interface operations {
             };
             /** @description CATEGORY_NAME_EXISTS: name already exists for this user */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    TransactionsController_list: {
+        parameters: {
+            query?: {
+                search?: string;
+                dateFrom?: string;
+                dateTo?: string;
+                categoryId?: string;
+                minAmount?: string;
+                maxAmount?: string;
+                type?: "INCOME" | "EXPENSE";
+                page?: number;
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionListResponseDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    TransactionsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTransactionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionResponseDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Category missing or owned by another user */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    TransactionsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    TransactionsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    TransactionsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTransactionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionResponseDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
