@@ -25,6 +25,9 @@ export function HomePage() {
           <Button component={Link} to="/transactions" variant="outlined">
             Транзакции
           </Button>
+          <Button component={Link} to="/audit-log" variant="outlined">
+            Журнал изменений
+          </Button>
           <Button
             variant="outlined"
             onClick={async () => {

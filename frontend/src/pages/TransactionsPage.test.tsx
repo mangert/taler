@@ -49,6 +49,95 @@ describe('TransactionsPage', () => {
     window.history.replaceState({}, '', '/');
   });
 
+  it('opens an owned transaction selected by an audit link', async () => {
+    const fetchMock = vi.fn((input: string) => {
+      if (input === '/api/v1/auth/me')
+        return Promise.resolve(jsonResponse(profile));
+      if (input.startsWith('/api/v1/categories?'))
+        return Promise.resolve(
+          jsonResponse({
+            items: [category],
+            meta: { page: 1, pageSize: 100, total: 1, totalPages: 1 },
+          }),
+        );
+      if (input.startsWith('/api/v1/transactions?'))
+        return Promise.resolve(
+          jsonResponse({
+            items: [],
+            meta: { page: 1, pageSize: 20, total: 0, totalPages: 0 },
+          }),
+        );
+      if (input === `/api/v1/transactions/${transaction.id}`)
+        return Promise.resolve(jsonResponse(transaction));
+      throw new Error(`Unexpected request: ${input}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.replaceState(
+      {},
+      '',
+      `/transactions?transactionId=${transaction.id}`,
+    );
+
+    render(<App />);
+
+    expect(
+      await screen.findByRole('heading', { name: 'Выбранная транзакция' }),
+    ).toBeInTheDocument();
+    expect(await screen.findByText('Coffee')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      `/api/v1/transactions/${transaction.id}`,
+      expect.objectContaining({ credentials: 'include' }),
+    );
+  });
+
+  it('retries a failed selected transaction request without claiming it was deleted', async () => {
+    const user = userEvent.setup();
+    let detailAttempts = 0;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((input: string) => {
+        if (input === '/api/v1/auth/me')
+          return Promise.resolve(jsonResponse(profile));
+        if (input.startsWith('/api/v1/categories?'))
+          return Promise.resolve(
+            jsonResponse({
+              items: [category],
+              meta: { page: 1, pageSize: 100, total: 1, totalPages: 1 },
+            }),
+          );
+        if (input.startsWith('/api/v1/transactions?'))
+          return Promise.resolve(
+            jsonResponse({
+              items: [],
+              meta: { page: 1, pageSize: 20, total: 0, totalPages: 0 },
+            }),
+          );
+        if (input === `/api/v1/transactions/${transaction.id}`) {
+          detailAttempts += 1;
+          return detailAttempts === 1
+            ? Promise.reject(new Error('Network unavailable'))
+            : Promise.resolve(jsonResponse(transaction));
+        }
+        throw new Error(`Unexpected request: ${input}`);
+      }),
+    );
+    window.history.replaceState(
+      {},
+      '',
+      `/transactions?transactionId=${transaction.id}`,
+    );
+
+    render(<App />);
+
+    expect(
+      await screen.findByText('Не удалось загрузить транзакцию.'),
+    ).toBeInTheDocument();
+    await user.click(
+      screen.getByRole('button', { name: 'Повторить загрузку' }),
+    );
+    expect(await screen.findByText('Coffee')).toBeInTheDocument();
+  });
+
   it('restores URL filters and shows the owned transactions', async () => {
     const fetchMock = vi.fn((input: string) => {
       if (input === '/api/v1/auth/me')

@@ -27,6 +27,8 @@ function transactionUrl(id: string): string {
 }
 
 export const transactionsApi = {
+  get: (id: string): Promise<Transaction> =>
+    apiRequest<Transaction>(transactionUrl(id)),
   list: (params: TransactionListParams): Promise<TransactionList> => {
     const query = new URLSearchParams({
       page: String(params.page),

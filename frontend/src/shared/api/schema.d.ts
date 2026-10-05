@@ -179,6 +179,23 @@ export interface paths {
         patch: operations["TransactionsController_update"];
         trace?: never;
     };
+    "/api/v1/audit-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List current user audit entries */
+        get: operations["AuditController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -409,6 +426,38 @@ export interface components {
             transactionDate?: string;
             /** @example Coffee */
             description?: string | null;
+        };
+        AuditLogResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            entityType: "TRANSACTION" | "BUDGET";
+            /** Format: uuid */
+            entityId: string;
+            /** @enum {string} */
+            action: "CREATE" | "UPDATE" | "DELETE";
+            before: {
+                [key: string]: unknown;
+            } | null;
+            after: {
+                [key: string]: unknown;
+            } | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AuditLogListMetaDto: {
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            pageSize: number;
+            /** @example 2 */
+            total: number;
+            /** @example 1 */
+            totalPages: number;
+        };
+        AuditLogListResponseDto: {
+            items: components["schemas"]["AuditLogResponseDto"][];
+            meta: components["schemas"]["AuditLogListMetaDto"];
         };
         HealthChecksDto: {
             /**
@@ -1095,6 +1144,50 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    AuditController_list: {
+        parameters: {
+            query?: {
+                entityType?: "TRANSACTION" | "BUDGET";
+                action?: "CREATE" | "UPDATE" | "DELETE";
+                /** @description Inclusive UTC day */
+                dateFrom?: string;
+                /** @description Inclusive UTC day */
+                dateTo?: string;
+                page?: number;
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditLogListResponseDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

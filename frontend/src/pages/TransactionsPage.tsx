@@ -26,7 +26,13 @@ import type {
   UpdateTransactionInput,
 } from '../shared/api/transactions';
 import { transactionKeys } from '../features/transactions/transaction-keys';
+import { auditKeys } from '../features/audit/audit-keys';
+import {
+  formatTransactionAmount,
+  formatTransactionDate,
+} from '../features/transactions/transaction-format';
 import { categoriesApi } from '../shared/api/categories';
+import { ApiError } from '../shared/api/http';
 import {
   transactionsApi,
   type TransactionListParams,
@@ -64,6 +70,7 @@ export function TransactionsPage() {
     useState<Transaction | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const params = readParams(searchParams);
+  const selectedTransactionId = searchParams.get('transactionId') ?? '';
   const hasFilters = Boolean(
     params.search ||
     params.dateFrom ||
@@ -78,6 +85,12 @@ export function TransactionsPage() {
     queryKey: transactionKeys.list(userId, params),
     queryFn: () => transactionsApi.list(params),
     enabled: Boolean(userId),
+  });
+  const selectedTransactionQuery = useQuery({
+    queryKey: transactionKeys.detail(userId, selectedTransactionId),
+    queryFn: () => transactionsApi.get(selectedTransactionId),
+    enabled: Boolean(userId && selectedTransactionId),
+    retry: false,
   });
   const categoriesQuery = useQuery({
     queryKey: ['categories', userId, 'transactions-options'],
@@ -114,6 +127,7 @@ export function TransactionsPage() {
       queryClient.invalidateQueries({ queryKey: transactionKeys.all(userId) }),
       queryClient.invalidateQueries({ queryKey: ['dashboard', userId] }),
       queryClient.invalidateQueries({ queryKey: ['budgets', userId] }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.all(userId) }),
     ]);
     setFormOpen(false);
     setEditingTransaction(null);
@@ -128,6 +142,7 @@ export function TransactionsPage() {
       queryClient.invalidateQueries({ queryKey: transactionKeys.all(userId) }),
       queryClient.invalidateQueries({ queryKey: ['dashboard', userId] }),
       queryClient.invalidateQueries({ queryKey: ['budgets', userId] }),
+      queryClient.invalidateQueries({ queryKey: auditKeys.all(userId) }),
     ]);
     setDeletingTransaction(null);
   };
@@ -179,6 +194,62 @@ export function TransactionsPage() {
           >
             Не удалось загрузить категории.
           </Alert>
+        ) : null}
+        {selectedTransactionId ? (
+          <Box component="section" aria-label="Выбранная транзакция">
+            <Typography component="h2" variant="h5">
+              Выбранная транзакция
+            </Typography>
+            {selectedTransactionQuery.isPending ? (
+              <Typography role="status">Загружаем транзакцию…</Typography>
+            ) : selectedTransactionQuery.isError ? (
+              <Alert
+                severity="warning"
+                action={
+                  selectedTransactionQuery.error instanceof ApiError &&
+                  selectedTransactionQuery.error.statusCode === 404 ? null : (
+                    <Button
+                      onClick={() => void selectedTransactionQuery.refetch()}
+                    >
+                      Повторить загрузку
+                    </Button>
+                  )
+                }
+              >
+                {selectedTransactionQuery.error instanceof ApiError &&
+                selectedTransactionQuery.error.statusCode === 404
+                  ? 'Транзакция больше не доступна.'
+                  : 'Не удалось загрузить транзакцию.'}
+              </Alert>
+            ) : (
+              <Stack spacing={1}>
+                <Typography>
+                  {selectedTransactionQuery.data.description || 'Без описания'}
+                </Typography>
+                <Typography>
+                  {formatTransactionAmount(
+                    selectedTransactionQuery.data.amount,
+                    selectedTransactionQuery.data.currency,
+                    selectedTransactionQuery.data.type,
+                  )}
+                </Typography>
+                <Typography>
+                  {formatTransactionDate(
+                    selectedTransactionQuery.data.transactionDate,
+                  )}
+                </Typography>
+              </Stack>
+            )}
+            <Button
+              onClick={() => {
+                const next = new URLSearchParams(searchParams);
+                next.delete('transactionId');
+                setSearchParams(next, { replace: true });
+              }}
+            >
+              Закрыть транзакцию
+            </Button>
+          </Box>
         ) : null}
         <TransactionsFilterBar
           filters={params}

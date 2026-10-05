@@ -54,6 +54,8 @@ describe('transactions (e2e)', () => {
   let app: INestApplication;
   let created: Record<string, unknown> | undefined;
   let records: TransactionRecord[];
+  let auditRecords: Record<string, unknown>[];
+  let failAuditWrite: boolean;
   let listArgs:
     { where: Where; skip: number; take: number; orderBy: unknown } | undefined;
 
@@ -79,6 +81,8 @@ describe('transactions (e2e)', () => {
   beforeEach(async () => {
     created = undefined;
     records = [];
+    auditRecords = [];
+    failAuditWrite = false;
     listArgs = undefined;
     const prisma = {
       user: { findUnique: async () => ({ baseCurrency: 'EUR' }) },
@@ -142,16 +146,47 @@ describe('transactions (e2e)', () => {
           where: Where;
           data: Partial<TransactionRecord>;
         }) => {
-          const record = records.find((candidate) => matches(candidate, where));
-          if (!record) throw new Error('Missing record');
-          Object.assign(record, data);
-          return record;
+          const index = records.findIndex((candidate) =>
+            matches(candidate, where),
+          );
+          if (index < 0) throw new Error('Missing record');
+          const updated = { ...records[index], ...data };
+          records[index] = updated;
+          return updated;
         },
         delete: async ({ where }: { where: Where }) => {
           const index = records.findIndex((record) => matches(record, where));
           if (index < 0) throw new Error('Missing record');
           return records.splice(index, 1)[0];
         },
+      },
+    };
+    const transactionClient = {
+      ...prisma,
+      auditLog: {
+        create: async ({ data }: { data: Record<string, unknown> }) => {
+          if (failAuditWrite) throw new Error('Audit write failed');
+          auditRecords.push(data);
+          return { ...data, id: '60000000-0000-4000-8000-000000000001' };
+        },
+      },
+    };
+    const prismaOverride = {
+      ...prisma,
+      $transaction: async <T>(
+        operation: (client: typeof transactionClient) => Promise<T>,
+      ): Promise<T> => {
+        const previousRecords = records;
+        const previousAudits = auditRecords;
+        records = records.map((record) => ({ ...record }));
+        auditRecords = [...auditRecords];
+        try {
+          return await operation(transactionClient);
+        } catch (error: unknown) {
+          records = previousRecords;
+          auditRecords = previousAudits;
+          throw error;
+        }
       },
     };
     app = await createTestApplication({
@@ -161,7 +196,7 @@ describe('transactions (e2e)', () => {
           .overrideProvider(DatabaseHealthIndicator)
           .useValue({ check: async (): Promise<void> => undefined })
           .overrideProvider(PrismaService)
-          .useValue(prisma),
+          .useValue(prismaOverride),
     });
   });
 
@@ -182,6 +217,26 @@ describe('transactions (e2e)', () => {
     });
     expect(created?.userId).toBe(user.id);
     expect((created?.baseAmount as Prisma.Decimal).eq('11.3580')).toBe(true);
+    expect(auditRecords).toEqual([
+      expect.objectContaining({
+        userId: user.id,
+        entityType: 'TRANSACTION',
+        action: 'CREATE',
+        after: expect.objectContaining({ amount: '12.3456' }),
+      }),
+    ]);
+  });
+
+  it('rolls back transaction creation when the audit write fails', async () => {
+    failAuditWrite = true;
+    await authenticateRequest(
+      request(app.getHttpServer()).post('/api/v1/transactions'),
+      user,
+    )
+      .send(input)
+      .expect(500);
+    expect(records).toHaveLength(0);
+    expect(auditRecords).toHaveLength(0);
   });
 
   it('requires authentication and rejects client-owned fields', async () => {
@@ -282,6 +337,43 @@ describe('transactions (e2e)', () => {
       user,
     ).expect(204);
     expect(records).toHaveLength(0);
+    expect(auditRecords.map((entry) => entry.action)).toEqual([
+      'CREATE',
+      'UPDATE',
+      'DELETE',
+    ]);
+    expect(auditRecords[0]).not.toHaveProperty('before');
+    expect(auditRecords[0].after).toMatchObject({ amount: '12.3456' });
+    expect(auditRecords[1].before).toMatchObject({ amount: '12.3456' });
+    expect(auditRecords[1].after).toMatchObject({ amount: '20.0000' });
+    expect(auditRecords[2].before).toMatchObject({ amount: '20.0000' });
+    expect(auditRecords[2]).not.toHaveProperty('after');
+  });
+
+  it('rolls back updates and deletion when the audit write fails', async () => {
+    const createdResponse = await authenticateRequest(
+      request(app.getHttpServer()).post('/api/v1/transactions'),
+      user,
+    )
+      .send(input)
+      .expect(201);
+    const id: string = createdResponse.body.id;
+    failAuditWrite = true;
+
+    await authenticateRequest(
+      request(app.getHttpServer()).patch(`/api/v1/transactions/${id}`),
+      user,
+    )
+      .send({ amount: '20.0000' })
+      .expect(500);
+    expect(records[0].amount.toFixed(4)).toBe('12.3456');
+
+    await authenticateRequest(
+      request(app.getHttpServer()).delete(`/api/v1/transactions/${id}`),
+      user,
+    ).expect(500);
+    expect(records).toHaveLength(1);
+    expect(auditRecords.map((entry) => entry.action)).toEqual(['CREATE']);
   });
 
   it('returns 404 for another user transaction on read, update and delete', async () => {

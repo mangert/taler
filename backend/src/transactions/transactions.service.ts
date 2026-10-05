@@ -5,10 +5,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import {
+  AuditAction,
+  AuditableEntityType,
   Prisma,
   type Transaction,
   type TransactionType,
 } from '../generated/prisma/client.js';
+import { transactionAuditSnapshot } from '../audit/audit-snapshot.js';
+import { AuditService } from '../audit/audit.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateTransactionDto } from './dto/create-transaction.dto.js';
 import { ListTransactionsQueryDto } from './dto/list-transactions-query.dto.js';
@@ -66,7 +70,10 @@ function positive(value: string, field: string): Prisma.Decimal {
 
 @Injectable()
 export class TransactionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
+  ) {}
 
   async list(
     userId: string,
@@ -139,17 +146,27 @@ export class TransactionsService {
       dto.exchangeRateToBase,
       baseCurrency,
     );
-    const record = await this.prisma.transaction.create({
-      data: {
+    const transactionDate = dateValue(dto.transactionDate);
+    return this.prisma.$transaction(async (transaction) => {
+      const record = await transaction.transaction.create({
+        data: {
+          userId,
+          categoryId: dto.categoryId,
+          type: dto.type,
+          ...money,
+          transactionDate,
+          description: dto.description ?? null,
+        },
+      });
+      await this.audit.record(transaction, {
         userId,
-        categoryId: dto.categoryId,
-        type: dto.type,
-        ...money,
-        transactionDate: dateValue(dto.transactionDate),
-        description: dto.description ?? null,
-      },
+        entityType: AuditableEntityType.TRANSACTION,
+        entityId: record.id,
+        action: AuditAction.CREATE,
+        after: transactionAuditSnapshot(record),
+      });
+      return toResponse(record);
     });
-    return toResponse(record);
   }
 
   async update(
@@ -157,44 +174,54 @@ export class TransactionsService {
     id: string,
     dto: UpdateTransactionDto,
   ): Promise<TransactionResponseDto> {
-    const current = await this.getOwned(userId, id);
     if (Object.values(dto).every((value) => value === undefined)) {
       throw new BadRequestException({
         code: 'EMPTY_UPDATE',
         message: 'At least one transaction field is required',
       });
     }
-    const categoryId = dto.categoryId ?? current.categoryId;
-    const type = dto.type ?? current.type;
-    await this.assertCategory(userId, categoryId, type);
-    const baseCurrency = await this.getBaseCurrency(userId);
-    const money = this.money(
-      dto.amount ?? current.amount.toString(),
-      dto.currency ?? current.currency,
-      dto.exchangeRateToBase ?? current.exchangeRateToBase.toString(),
-      baseCurrency,
-    );
     try {
-      const record = await this.prisma.transaction.update({
-        where: { id, userId },
-        data: {
-          ...(dto.categoryId !== undefined ? { categoryId } : {}),
-          ...(dto.type !== undefined ? { type } : {}),
-          ...(dto.amount !== undefined ? { amount: money.amount } : {}),
-          ...(dto.currency !== undefined ? { currency: dto.currency } : {}),
-          ...(dto.exchangeRateToBase !== undefined
-            ? { exchangeRateToBase: money.exchangeRateToBase }
-            : {}),
-          baseAmount: money.baseAmount,
-          ...(dto.transactionDate !== undefined
-            ? { transactionDate: dateValue(dto.transactionDate) }
-            : {}),
-          ...(dto.description !== undefined
-            ? { description: dto.description }
-            : {}),
-        },
+      return await this.prisma.$transaction(async (transaction) => {
+        const current = await this.getOwned(userId, id, transaction);
+        const categoryId = dto.categoryId ?? current.categoryId;
+        const type = dto.type ?? current.type;
+        await this.assertCategory(userId, categoryId, type, transaction);
+        const baseCurrency = await this.getBaseCurrency(userId, transaction);
+        const money = this.money(
+          dto.amount ?? current.amount.toString(),
+          dto.currency ?? current.currency,
+          dto.exchangeRateToBase ?? current.exchangeRateToBase.toString(),
+          baseCurrency,
+        );
+        const record = await transaction.transaction.update({
+          where: { id, userId },
+          data: {
+            ...(dto.categoryId !== undefined ? { categoryId } : {}),
+            ...(dto.type !== undefined ? { type } : {}),
+            ...(dto.amount !== undefined ? { amount: money.amount } : {}),
+            ...(dto.currency !== undefined ? { currency: dto.currency } : {}),
+            ...(dto.exchangeRateToBase !== undefined
+              ? { exchangeRateToBase: money.exchangeRateToBase }
+              : {}),
+            baseAmount: money.baseAmount,
+            ...(dto.transactionDate !== undefined
+              ? { transactionDate: dateValue(dto.transactionDate) }
+              : {}),
+            ...(dto.description !== undefined
+              ? { description: dto.description }
+              : {}),
+          },
+        });
+        await this.audit.record(transaction, {
+          userId,
+          entityType: AuditableEntityType.TRANSACTION,
+          entityId: id,
+          action: AuditAction.UPDATE,
+          before: transactionAuditSnapshot(current),
+          after: transactionAuditSnapshot(record),
+        });
+        return toResponse(record);
       });
-      return toResponse(record);
     } catch (error: unknown) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -206,9 +233,18 @@ export class TransactionsService {
   }
 
   async remove(userId: string, id: string): Promise<void> {
-    await this.getOwned(userId, id);
     try {
-      await this.prisma.transaction.delete({ where: { id, userId } });
+      await this.prisma.$transaction(async (transaction) => {
+        const current = await this.getOwned(userId, id, transaction);
+        await transaction.transaction.delete({ where: { id, userId } });
+        await this.audit.record(transaction, {
+          userId,
+          entityType: AuditableEntityType.TRANSACTION,
+          entityId: id,
+          action: AuditAction.DELETE,
+          before: transactionAuditSnapshot(current),
+        });
+      });
     } catch (error: unknown) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -243,8 +279,11 @@ export class TransactionsService {
     return { amount, currency, exchangeRateToBase, baseAmount };
   }
 
-  private async getBaseCurrency(userId: string): Promise<string> {
-    const user = await this.prisma.user.findUnique({
+  private async getBaseCurrency(
+    userId: string,
+    client: Prisma.TransactionClient = this.prisma,
+  ): Promise<string> {
+    const user = await client.user.findUnique({
       where: { id: userId },
       select: { baseCurrency: true },
     });
@@ -260,8 +299,9 @@ export class TransactionsService {
     userId: string,
     id: string,
     type: TransactionType,
+    client: Prisma.TransactionClient = this.prisma,
   ): Promise<void> {
-    const category = await this.prisma.category.findFirst({
+    const category = await client.category.findFirst({
       where: { id, userId },
     });
     if (!category)
@@ -277,8 +317,12 @@ export class TransactionsService {
     }
   }
 
-  private async getOwned(userId: string, id: string): Promise<Transaction> {
-    const record = await this.prisma.transaction.findFirst({
+  private async getOwned(
+    userId: string,
+    id: string,
+    client: Prisma.TransactionClient = this.prisma,
+  ): Promise<Transaction> {
+    const record = await client.transaction.findFirst({
       where: { id, userId },
     });
     if (!record) this.notFound();

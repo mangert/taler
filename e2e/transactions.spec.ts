@@ -96,6 +96,26 @@ for (const viewport of [
       await expect(editForm).toHaveCount(0);
       await expect(list.getByText(/44,75/)).toBeVisible();
 
+      await page.goto('/audit-log?action=UPDATE&entityType=TRANSACTION');
+      await expect(
+        page.getByRole('heading', { name: 'Журнал изменений' }),
+      ).toBeVisible();
+      const journalEntry =
+        viewport.name === 'mobile'
+          ? page
+              .getByRole('list', { name: 'Карточки изменений' })
+              .getByRole('listitem')
+              .filter({ hasText: description })
+          : page
+              .getByRole('table', { name: 'Журнал изменений' })
+              .getByRole('row')
+              .filter({ hasText: description });
+      await expect(journalEntry).toContainText('Изменение');
+
+      await page.goto(
+        `/transactions?search=${encodeURIComponent(description)}`,
+      );
+      await expect(list.getByText(description)).toBeVisible();
       await page
         .getByRole('button', { name: `Удалить транзакцию ${description}` })
         .click();
