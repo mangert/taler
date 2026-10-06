@@ -34,15 +34,16 @@ export class UsersService {
       dto.baseCurrency !== undefined &&
       dto.baseCurrency !== existingUser.baseCurrency
     ) {
-      const transactionCount = await this.prisma.transaction.count({
-        where: { userId },
-      });
+      const [transactionCount, budgetCount] = await Promise.all([
+        this.prisma.transaction.count({ where: { userId } }),
+        this.prisma.budget.count({ where: { userId } }),
+      ]);
 
-      if (transactionCount > 0) {
+      if (transactionCount + budgetCount > 0) {
         throw new ConflictException({
           code: 'BASE_CURRENCY_LOCKED',
           message:
-            'Base currency cannot be changed after the first transaction',
+            'Base currency cannot be changed after the first transaction or budget',
         });
       }
     }

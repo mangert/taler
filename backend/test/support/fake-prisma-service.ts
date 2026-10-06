@@ -42,6 +42,7 @@ interface CountTransactionArguments {
 export class FakePrismaService {
   private readonly users: FakeUser[] = [];
   private readonly transactionUserIds: string[] = [];
+  private readonly budgetUserIds: string[] = [];
 
   readonly user = {
     findUnique: async (
@@ -89,8 +90,18 @@ export class FakePrismaService {
       ).length,
   };
 
+  readonly budget = {
+    count: async (arguments_: CountTransactionArguments): Promise<number> =>
+      this.budgetUserIds.filter((userId) => userId === arguments_.where.userId)
+        .length,
+  };
+
   addTransaction(userId: string): void {
     this.transactionUserIds.push(userId);
+  }
+
+  addBudget(userId: string): void {
+    this.budgetUserIds.push(userId);
   }
 
   getUsers(): FakeUser[] {

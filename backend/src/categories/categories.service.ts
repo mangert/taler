@@ -95,7 +95,7 @@ export class CategoriesService {
     id: string,
     dto: UpdateCategoryDto,
   ): Promise<CategoryResponseDto> {
-    await this.getOwned(userId, id);
+    const current = await this.getOwned(userId, id);
     if (
       [dto.name, dto.icon, dto.color, dto.type].every(
         (value) => value === undefined,
@@ -105,6 +105,12 @@ export class CategoriesService {
         code: 'EMPTY_UPDATE',
         message: 'At least one category field is required',
       });
+    }
+    if (dto.type !== undefined && dto.type !== current.type) {
+      const budgetCount = await this.prisma.budget.count({
+        where: { userId, categoryId: id },
+      });
+      if (budgetCount > 0) this.inUse();
     }
     if (dto.name !== undefined)
       await this.assertUniqueName(userId, dto.name, id);

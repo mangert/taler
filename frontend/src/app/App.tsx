@@ -12,6 +12,7 @@ import { ProfilePage } from '../pages/ProfilePage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { TransactionsPage } from '../pages/TransactionsPage';
 import { AuditLogPage } from '../pages/AuditLogPage';
+import { BudgetsPage } from '../pages/BudgetsPage';
 import { createAppQueryClient } from './query-client';
 import { appTheme } from './theme';
 
@@ -23,6 +24,7 @@ export function AppRoutes() {
         <Route path="/register" element={<RegisterPage />} />
       </Route>
       <Route element={<ProtectedRoute />}>
+        <Route path={'/budgets'} element={<BudgetsPage />} />
         <Route path="/" element={<HomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/categories" element={<CategoriesPage />} />
