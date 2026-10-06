@@ -1,6 +1,7 @@
-import { Button, Container, Stack, Typography } from '@mui/material';
+import { Box, Button, Container, Stack, Typography } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/auth-context';
+import { DashboardPage } from './DashboardPage';
 
 export function HomePage() {
   const { user, logout } = useAuth();
@@ -13,9 +14,16 @@ export function HomePage() {
           Добро пожаловать, {user?.displayName}
         </Typography>
         <Typography color="text.secondary">
-          Основные финансовые разделы появятся на следующих этапах.
+          Ваши финансы за последние шесть месяцев.
         </Typography>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            flexWrap: 'wrap',
+            gap: 2,
+          }}
+        >
           <Button component={Link} to="/profile" variant="contained">
             Открыть профиль
           </Button>
@@ -40,7 +48,8 @@ export function HomePage() {
           >
             Выйти
           </Button>
-        </Stack>
+        </Box>
+        <DashboardPage />
       </Stack>
     </Container>
   );

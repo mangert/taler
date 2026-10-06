@@ -233,6 +233,23 @@ export interface paths {
         patch: operations["BudgetsController_update"];
         trace?: never;
     };
+    "/api/v1/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get owned financial dashboard for recent months */
+        get: operations["DashboardController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -558,6 +575,55 @@ export interface components {
             month?: string;
             /** @example 500.0000 */
             limitAmount?: string;
+        };
+        DashboardTotalsDto: {
+            /** @example 1000.0000 */
+            income: string;
+            /** @example 350.0000 */
+            expense: string;
+            /** @example 650.0000 */
+            balance: string;
+        };
+        DashboardCategoryDto: {
+            /** Format: uuid */
+            categoryId: string;
+            /** @example Groceries */
+            categoryName: string;
+            /** @example #2E7D32 */
+            color: string;
+            /** @example 250.0000 */
+            amount: string;
+        };
+        DashboardMonthlyDto: {
+            /**
+             * Format: date
+             * @example 2026-09-01
+             */
+            month: string;
+            /** @example 1000.0000 */
+            income: string;
+            /** @example 350.0000 */
+            expense: string;
+        };
+        DashboardResponseDto: {
+            /** @example EUR */
+            currency: string;
+            /** @example 6 */
+            months: number;
+            /**
+             * Format: date
+             * @example 2026-04-01
+             */
+            fromMonth: string;
+            /**
+             * Format: date
+             * @example 2026-09-01
+             */
+            toMonth: string;
+            totals: components["schemas"]["DashboardTotalsDto"];
+            expensesByCategory: components["schemas"]["DashboardCategoryDto"][];
+            monthlySeries: components["schemas"]["DashboardMonthlyDto"][];
+            topCategories: components["schemas"]["DashboardCategoryDto"][];
         };
         HealthChecksDto: {
             /**
@@ -1512,6 +1578,43 @@ export interface operations {
                 };
             };
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    DashboardController_get: {
+        parameters: {
+            query?: {
+                months?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardResponseDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

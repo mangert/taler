@@ -27,6 +27,7 @@ import type {
 } from '../shared/api/transactions';
 import { transactionKeys } from '../features/transactions/transaction-keys';
 import { auditKeys } from '../features/audit/audit-keys';
+import { dashboardKeys } from '../features/dashboard/dashboard-keys';
 import {
   formatTransactionAmount,
   formatTransactionDate,
@@ -125,7 +126,7 @@ export function TransactionsPage() {
     }
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: transactionKeys.all(userId) }),
-      queryClient.invalidateQueries({ queryKey: ['dashboard', userId] }),
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all(userId) }),
       queryClient.invalidateQueries({ queryKey: ['budgets', userId] }),
       queryClient.invalidateQueries({ queryKey: auditKeys.all(userId) }),
     ]);
@@ -140,7 +141,7 @@ export function TransactionsPage() {
     await deleteTransaction.mutateAsync(transaction.id);
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: transactionKeys.all(userId) }),
-      queryClient.invalidateQueries({ queryKey: ['dashboard', userId] }),
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.all(userId) }),
       queryClient.invalidateQueries({ queryKey: ['budgets', userId] }),
       queryClient.invalidateQueries({ queryKey: auditKeys.all(userId) }),
     ]);
