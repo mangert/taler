@@ -160,6 +160,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/transactions/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export all owned transactions matching list filters as CSV */
+        get: operations["TransactionsController_export"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/transactions/{id}": {
         parameters: {
             query?: never;
@@ -190,6 +207,23 @@ export interface paths {
         get: operations["AuditController_list"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transaction-imports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Atomically import mapped UTF-8 CSV transactions */
+        post: operations["TransactionImportsController_import"];
         delete?: never;
         options?: never;
         head?: never;
@@ -512,6 +546,10 @@ export interface components {
         AuditLogListResponseDto: {
             items: components["schemas"]["AuditLogResponseDto"][];
             meta: components["schemas"]["AuditLogListMetaDto"];
+        };
+        ImportResultDto: {
+            /** @example 2 */
+            importedCount: number;
         };
         BudgetResponseDto: {
             /** Format: uuid */
@@ -1198,6 +1236,50 @@ export interface operations {
             };
         };
     };
+    TransactionsController_export: {
+        parameters: {
+            query?: {
+                search?: string;
+                dateFrom?: string;
+                dateTo?: string;
+                categoryId?: string;
+                minAmount?: string;
+                maxAmount?: string;
+                type?: "INCOME" | "EXPENSE";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description UTF-8 CSV download */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
     TransactionsController_get: {
         parameters: {
             query?: never;
@@ -1343,6 +1425,50 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuditLogListResponseDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    TransactionImportsController_import: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    /** @description JSON mapping of CSV headers */
+                    mapping: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportResultDto"];
                 };
             };
             400: {

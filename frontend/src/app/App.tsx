@@ -11,6 +11,7 @@ import { LoginPage } from '../pages/LoginPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { TransactionsPage } from '../pages/TransactionsPage';
+import { TransactionImportPage } from '../pages/TransactionImportPage';
 import { AuditLogPage } from '../pages/AuditLogPage';
 import { BudgetsPage } from '../pages/BudgetsPage';
 import { createAppQueryClient } from './query-client';
@@ -29,6 +30,10 @@ export function AppRoutes() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/transactions" element={<TransactionsPage />} />
+        <Route
+          path="/transaction-imports"
+          element={<TransactionImportPage />}
+        />
         <Route path="/audit-log" element={<AuditLogPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -22,7 +22,7 @@ import {
 } from './dto/transaction-response.dto.js';
 import { UpdateTransactionDto } from './dto/update-transaction.dto.js';
 import {
-  buildTransactionWhere,
+  buildTransactionPrismaWhere,
   createDefaultTransactionOrderBy,
 } from './transaction-query.builder.js';
 
@@ -79,40 +79,7 @@ export class TransactionsService {
     userId: string,
     query: ListTransactionsQueryDto,
   ): Promise<TransactionListResponseDto> {
-    if (query.dateFrom) dateValue(query.dateFrom);
-    if (query.dateTo) dateValue(query.dateTo);
-    if (query.dateFrom && query.dateTo && query.dateFrom > query.dateTo) {
-      throw new BadRequestException({
-        code: 'INVALID_DATE_RANGE',
-        message: 'dateFrom must not exceed dateTo',
-      });
-    }
-    if (
-      query.minAmount &&
-      query.maxAmount &&
-      new Prisma.Decimal(query.minAmount).gt(query.maxAmount)
-    ) {
-      throw new BadRequestException({
-        code: 'INVALID_AMOUNT_RANGE',
-        message: 'minAmount must not exceed maxAmount',
-      });
-    }
-    const built = buildTransactionWhere(userId, query);
-    const where: Prisma.TransactionWhereInput = {
-      ...built,
-      ...(built.transactionDate
-        ? {
-            transactionDate: {
-              ...(built.transactionDate.gte
-                ? { gte: dateValue(built.transactionDate.gte) }
-                : {}),
-              ...(built.transactionDate.lte
-                ? { lte: dateValue(built.transactionDate.lte) }
-                : {}),
-            },
-          }
-        : {}),
-    };
+    const where = buildTransactionPrismaWhere(userId, query);
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
     const [records, total] = await Promise.all([

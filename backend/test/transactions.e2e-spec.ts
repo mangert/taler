@@ -1,5 +1,6 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { parse } from 'csv-parse/sync';
 import { Prisma } from '../src/generated/prisma/client.js';
 import { DatabaseHealthIndicator } from '../src/health/database-health.indicator.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
@@ -49,6 +50,15 @@ const input = {
   transactionDate: '2026-09-01',
   description: 'Coffee',
 };
+const csvMapping = {
+  date: 'Date',
+  amount: 'Amount',
+  category: 'Category',
+  type: 'Type',
+  currency: 'Currency',
+  rate: 'Rate',
+  description: 'Description',
+};
 
 describe('transactions (e2e)', () => {
   let app: INestApplication;
@@ -57,7 +67,27 @@ describe('transactions (e2e)', () => {
   let auditRecords: Record<string, unknown>[];
   let failAuditWrite: boolean;
   let listArgs:
-    { where: Where; skip: number; take: number; orderBy: unknown } | undefined;
+    | { where: Where; skip?: number; take?: number; orderBy: unknown }
+    | undefined;
+
+  function uploadCsv(
+    contents: string | Buffer,
+    options: { owner?: typeof user; mapping?: object; mime?: string } = {},
+  ) {
+    return authenticateRequest(
+      request(app.getHttpServer()).post('/api/v1/transaction-imports'),
+      options.owner ?? user,
+    )
+      .field('mapping', JSON.stringify(options.mapping ?? csvMapping))
+      .attach(
+        'file',
+        Buffer.isBuffer(contents) ? contents : Buffer.from(contents),
+        {
+          filename: 'transactions.csv',
+          contentType: options.mime ?? 'text/csv',
+        },
+      );
+  }
 
   function matches(record: TransactionRecord, where: Where): boolean {
     return (
@@ -87,6 +117,10 @@ describe('transactions (e2e)', () => {
     const prisma = {
       user: { findUnique: async () => ({ baseCurrency: 'EUR' }) },
       category: {
+        findMany: async ({ where }: { where: { userId: string } }) =>
+          [category, incomeCategory, otherCategory].filter(
+            (candidate) => candidate.userId === where.userId,
+          ),
         findFirst: async ({
           where,
         }: {
@@ -123,19 +157,38 @@ describe('transactions (e2e)', () => {
           records.find((record) => matches(record, where)) ?? null,
         findMany: async (args: {
           where: Where;
-          skip: number;
-          take: number;
+          skip?: number;
+          take?: number;
+          cursor?: { id: string };
           orderBy: unknown;
+          include?: unknown;
         }) => {
           listArgs = args;
-          return records
+          const ordered = records
             .filter((record) => matches(record, args.where))
             .sort(
               (a, b) =>
                 b.transactionDate.getTime() - a.transactionDate.getTime() ||
                 b.id.localeCompare(a.id),
-            )
-            .slice(args.skip, args.skip + args.take);
+            );
+          const start = args.cursor
+            ? ordered.findIndex((record) => record.id === args.cursor?.id) + 1
+            : (args.skip ?? 0);
+          const page =
+            args.take === undefined
+              ? ordered.slice(start)
+              : ordered.slice(start, start + args.take);
+          return args.include
+            ? page.map((record) => ({
+                ...record,
+                category: {
+                  name:
+                    [category, incomeCategory, otherCategory].find(
+                      (candidate) => candidate.id === record.categoryId,
+                    )?.name ?? '',
+                },
+              }))
+            : page;
         },
         count: async ({ where }: { where: Where }) =>
           records.filter((record) => matches(record, where)).length,
@@ -670,5 +723,426 @@ describe('transactions (e2e)', () => {
       response.body.components.schemas.TransactionResponseDto.properties
         .baseAmount.example,
     ).toBe('12.3456');
+  });
+
+  it('imports mapped CSV rows with matching audit entries', async () => {
+    const csv = [
+      'Date,Amount,Category,Type,Currency,Rate,Description',
+      `2026-09-01,12.3456,${category.id},EXPENSE,USD,0.92000000,Coffee`,
+      `2026-09-02,5,${category.id},EXPENSE,EUR,1,Tea`,
+    ].join('\n');
+    const response = await authenticateRequest(
+      request(app.getHttpServer()).post('/api/v1/transaction-imports'),
+      user,
+    )
+      .field(
+        'mapping',
+        JSON.stringify({
+          date: 'Date',
+          amount: 'Amount',
+          category: 'Category',
+          type: 'Type',
+          currency: 'Currency',
+          rate: 'Rate',
+          description: 'Description',
+        }),
+      )
+      .attach('file', Buffer.from(csv), {
+        filename: 'transactions.csv',
+        contentType: 'text/csv',
+      })
+      .expect(201);
+    expect(response.body).toEqual({ importedCount: 2 });
+    expect(records).toHaveLength(2);
+    expect(records[0].baseAmount.toFixed(4)).toBe('11.3580');
+    expect(auditRecords).toHaveLength(2);
+  });
+
+  it.each([
+    {
+      name: 'an invalid calendar date',
+      row: `2026-02-30,10,${category.id},EXPENSE,EUR,1,Test`,
+      field: 'date',
+      code: 'INVALID_DATE',
+    },
+    {
+      name: 'an unsupported transaction type',
+      row: `2026-09-01,10,${category.id},TRANSFER,EUR,1,Test`,
+      field: 'type',
+      code: 'INVALID_TYPE',
+    },
+    {
+      name: 'a category owned by another user',
+      row: `2026-09-01,10,${otherCategory.id},EXPENSE,EUR,1,Test`,
+      field: 'category',
+      code: 'CATEGORY_NOT_FOUND',
+    },
+    {
+      name: 'a category with the wrong type',
+      row: `2026-09-01,10,${category.id},INCOME,EUR,1,Test`,
+      field: 'category',
+      code: 'CATEGORY_TYPE_MISMATCH',
+    },
+    {
+      name: 'a non-positive amount',
+      row: `2026-09-01,0,${category.id},EXPENSE,EUR,1,Test`,
+      field: 'amount',
+      code: 'INVALID_AMOUNT',
+    },
+    {
+      name: 'an invalid currency',
+      row: `2026-09-01,10,${category.id},EXPENSE,E1R,1,Test`,
+      field: 'currency',
+      code: 'INVALID_CURRENCY',
+    },
+    {
+      name: 'a missing rate for a foreign currency',
+      row: `2026-09-01,10,${category.id},EXPENSE,USD,,Test`,
+      field: 'rate',
+      code: 'INVALID_RATE',
+    },
+    {
+      name: 'a description longer than 500 characters',
+      row: `2026-09-01,10,${category.id},EXPENSE,EUR,1,${'A'.repeat(501)}`,
+      field: 'description',
+      code: 'INVALID_DESCRIPTION',
+    },
+    {
+      name: 'a calculated base amount beyond the supported precision',
+      row: `2026-09-01,999999999999999,${category.id},EXPENSE,USD,2,Test`,
+      field: 'amount',
+      code: 'BASE_AMOUNT_OVERFLOW',
+    },
+    {
+      name: 'a row with a different column count',
+      row: `2026-09-01,10,${category.id},EXPENSE,EUR,1`,
+      field: 'file',
+      code: 'CSV_COLUMN_COUNT',
+    },
+  ])(
+    'rejects CSV row with $name without writes',
+    async ({ row, field, code }) => {
+      const csv = [
+        'Date,Amount,Category,Type,Currency,Rate,Description',
+        row,
+      ].join('\n');
+      const response = await uploadCsv(csv).expect(400);
+      expect(response.body.code).toBe('CSV_ROW_ERRORS');
+      expect(response.body.details).toContainEqual(
+        expect.objectContaining({ row: 2, field, code }),
+      );
+      expect(records).toHaveLength(0);
+      expect(auditRecords).toHaveLength(0);
+    },
+  );
+
+  it.each([
+    {
+      name: 'a header without data rows',
+      csv: 'Date,Amount,Category,Type,Currency,Rate,Description',
+      code: 'EMPTY_CSV',
+    },
+    {
+      name: 'an unclosed quoted field',
+      csv: 'Date,Amount,Category,Type,Currency,Rate,Description\n"2026-09-01,10',
+      code: 'INVALID_CSV',
+    },
+    {
+      name: 'duplicate headers',
+      csv: 'Date,Date,Category,Type,Currency,Rate,Description\n2026-09-01,10,Test,EXPENSE,EUR,1,Test',
+      code: 'INVALID_CSV_HEADERS',
+    },
+    {
+      name: 'an empty header',
+      csv: 'Date,,Category,Type,Currency,Rate,Description\n2026-09-01,10,Test,EXPENSE,EUR,1,Test',
+      code: 'INVALID_CSV_HEADERS',
+    },
+    {
+      name: 'a missing mapped header',
+      csv: 'When,Amount,Category,Type,Currency,Rate,Description\n2026-09-01,10,Test,EXPENSE,EUR,1,Test',
+      code: 'INVALID_MAPPING',
+    },
+  ])('rejects CSV with $name without writes', async ({ csv, code }) => {
+    const response = await uploadCsv(csv).expect(400);
+    expect(response.body.code).toBe(code);
+    expect(records).toHaveLength(0);
+    expect(auditRecords).toHaveLength(0);
+  });
+
+  it('requires a file and rejects an empty upload without writes', async () => {
+    const missing = await authenticateRequest(
+      request(app.getHttpServer()).post('/api/v1/transaction-imports'),
+      user,
+    )
+      .field('mapping', JSON.stringify(csvMapping))
+      .expect(400);
+    expect(missing.body.code).toBe('CSV_FILE_REQUIRED');
+    const empty = await uploadCsv(Buffer.alloc(0)).expect(400);
+    expect(empty.body.code).toBe('INVALID_CSV_SIZE');
+    expect(records).toHaveLength(0);
+    expect(auditRecords).toHaveLength(0);
+  });
+
+  it('collects numbered CSV row errors without persisting valid rows', async () => {
+    const csv = [
+      'Date,Amount,Category,Type,Currency,Rate,Description',
+      `2026-09-01,10,${category.id},EXPENSE,EUR,1,Valid`,
+      `2026-02-30,0,${otherCategory.id},INCOME,USD,0,Bad`,
+    ].join('\n');
+    const response = await uploadCsv(csv).expect(400);
+    expect(response.body.code).toBe('CSV_ROW_ERRORS');
+    expect(response.body.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          row: 3,
+          field: 'date',
+          code: 'INVALID_DATE',
+        }),
+        expect.objectContaining({
+          row: 3,
+          field: 'category',
+          code: 'CATEGORY_NOT_FOUND',
+        }),
+        expect.objectContaining({
+          row: 3,
+          field: 'amount',
+          code: 'INVALID_AMOUNT',
+        }),
+        expect.objectContaining({
+          row: 3,
+          field: 'rate',
+          code: 'INVALID_RATE',
+        }),
+      ]),
+    );
+    expect(records).toHaveLength(0);
+    expect(auditRecords).toHaveLength(0);
+  });
+
+  it('reports the starting physical line of a multiline invalid CSV row', async () => {
+    const csv = [
+      'Date,Amount,Category,Type,Currency,Rate,Description',
+      `2026-09-01,0,${category.id},EXPENSE,EUR,1,"Bad\nrow"`,
+    ].join('\n');
+    const response = await uploadCsv(csv).expect(400);
+    expect(response.body.details).toContainEqual(
+      expect.objectContaining({ row: 2, field: 'amount' }),
+    );
+    expect(records).toHaveLength(0);
+  });
+
+  it('rolls back the whole CSV import when an audit write fails', async () => {
+    failAuditWrite = true;
+    const csv = [
+      'Date,Amount,Category,Type,Currency,Rate,Description',
+      `2026-09-01,10,${category.id},EXPENSE,EUR,1,First`,
+      `2026-09-02,20,${category.id},EXPENSE,EUR,1,Second`,
+    ].join('\n');
+    await uploadCsv(csv).expect(500);
+    expect(records).toHaveLength(0);
+    expect(auditRecords).toHaveLength(0);
+  });
+
+  it('rejects invalid CSV mapping, MIME type and UTF-8 encoding', async () => {
+    const csv = `Date,Amount,Category,Type,Currency,Rate,Description\n2026-09-01,10,${category.id},EXPENSE,EUR,1,Valid`;
+    expect(
+      (await uploadCsv(csv, { mapping: { date: 'Date' } }).expect(400)).body
+        .code,
+    ).toBe('INVALID_MAPPING');
+    expect(
+      (
+        await uploadCsv(csv, {
+          mapping: { ...csvMapping, amount: 'Date' },
+        }).expect(400)
+      ).body.code,
+    ).toBe('INVALID_MAPPING');
+    expect(
+      (await uploadCsv(csv, { mime: 'application/pdf' }).expect(400)).body.code,
+    ).toBe('INVALID_CSV_MIME');
+    expect(
+      (await uploadCsv(Buffer.from([0xff, 0xfe]), {}).expect(400)).body.code,
+    ).toBe('INVALID_CSV_ENCODING');
+    expect(records).toHaveLength(0);
+  });
+
+  it('uses owned category names and base currency when optional mappings are absent', async () => {
+    const csv = `Date,Amount,Category,Type\n2026-09-01,10.50,${category.name},EXPENSE`;
+    const response = await uploadCsv(csv, {
+      mapping: {
+        date: 'Date',
+        amount: 'Amount',
+        category: 'Category',
+        type: 'Type',
+      },
+    }).expect(201);
+    expect(response.body.importedCount).toBe(1);
+    expect(records[0]).toMatchObject({
+      categoryId: category.id,
+      currency: 'EUR',
+    });
+    expect(records[0].exchangeRateToBase.toFixed(8)).toBe('1.00000000');
+  });
+
+  it('rejects oversized CSV files and excessive row counts without writes', async () => {
+    const oversized = Buffer.alloc(5_242_881, 65);
+    await uploadCsv(oversized).expect(413);
+    const header = 'Date,Amount,Category,Type,Currency,Rate,Description';
+    const row = `2026-09-01,10,${category.id},EXPENSE,EUR,1,Test`;
+    const tooManyRows = [
+      header,
+      ...Array.from({ length: 10_001 }, () => row),
+    ].join('\n');
+    const response = await uploadCsv(tooManyRows).expect(400);
+    expect(response.body.code).toBe('CSV_ROW_LIMIT');
+    expect(records).toHaveLength(0);
+    expect(auditRecords).toHaveLength(0);
+  });
+
+  it('exports the same filtered owned rows as the list without pagination', async () => {
+    for (const description of ['Coffee A', 'Coffee B', 'Tea']) {
+      await authenticateRequest(
+        request(app.getHttpServer()).post('/api/v1/transactions'),
+        user,
+      )
+        .send({
+          ...input,
+          description,
+          currency: 'EUR',
+          exchangeRateToBase: '1',
+        })
+        .expect(201);
+    }
+    await authenticateRequest(
+      request(app.getHttpServer()).post('/api/v1/transactions'),
+      user,
+    )
+      .send({
+        ...input,
+        description: 'Coffee outside date range',
+        transactionDate: '2026-09-03',
+        currency: 'EUR',
+        exchangeRateToBase: '1',
+      })
+      .expect(201);
+    await authenticateRequest(
+      request(app.getHttpServer()).post('/api/v1/transactions'),
+      otherUser,
+    )
+      .send({
+        ...input,
+        categoryId: otherCategory.id,
+        description: 'Coffee foreign',
+        currency: 'EUR',
+        exchangeRateToBase: '1',
+      })
+      .expect(201);
+    const filters = `search=coffee&categoryId=${category.id}&dateFrom=2026-09-01&dateTo=2026-09-02&minAmount=10&maxAmount=20&type=EXPENSE`;
+    const firstPage = await authenticateRequest(
+      request(app.getHttpServer()).get(
+        `/api/v1/transactions?${filters}&page=1&pageSize=1`,
+      ),
+      user,
+    ).expect(200);
+    const secondPage = await authenticateRequest(
+      request(app.getHttpServer()).get(
+        `/api/v1/transactions?${filters}&page=2&pageSize=1`,
+      ),
+      user,
+    ).expect(200);
+    expect(firstPage.body.meta.total).toBe(2);
+    expect(secondPage.body.meta.total).toBe(2);
+    const exported = await authenticateRequest(
+      request(app.getHttpServer()).get(
+        `/api/v1/transactions/export?${filters}`,
+      ),
+      user,
+    ).expect(200);
+    expect(exported.headers['content-type']).toMatch(/^text\/csv/);
+    expect(exported.headers['content-disposition']).toContain(
+      'attachment; filename="transactions.csv"',
+    );
+    const rows = parse(exported.text, { bom: true, columns: true }) as {
+      description: string;
+    }[];
+    const listedDescriptions = [
+      ...(firstPage.body.items as { description: string }[]),
+      ...(secondPage.body.items as { description: string }[]),
+    ].map((item) => item.description);
+    expect(rows.map((row) => row.description)).toEqual(listedDescriptions);
+    expect(rows).toHaveLength(2);
+    expect(listArgs?.take).toBe(500);
+  });
+
+  it('streams every row across internal export batches', async () => {
+    await authenticateRequest(
+      request(app.getHttpServer()).post('/api/v1/transactions'),
+      user,
+    )
+      .send({ ...input, currency: 'EUR', exchangeRateToBase: '1' })
+      .expect(201);
+    const first = records[0];
+    for (let index = 2; index <= 501; index += 1) {
+      records.push({
+        ...first,
+        id: `33333333-3333-4333-8333-${String(index).padStart(12, '0')}`,
+        description: `Export ${index}`,
+      });
+    }
+    const exported = await authenticateRequest(
+      request(app.getHttpServer()).get('/api/v1/transactions/export'),
+      user,
+    ).expect(200);
+    const rows = parse(exported.text, { bom: true, columns: true }) as {
+      description: string;
+    }[];
+    expect(rows).toHaveLength(501);
+    expect(rows.map((row) => row.description)).toContain('Export 501');
+    expect(rows.map((row) => row.description)).toContain('Coffee');
+  });
+
+  it('escapes CSV formula cells and rejects export pagination or missing JWT', async () => {
+    await authenticateRequest(
+      request(app.getHttpServer()).post('/api/v1/transactions'),
+      user,
+    )
+      .send({ ...input, description: '  =HYPERLINK("https://example.test")' })
+      .expect(201);
+    const exported = await authenticateRequest(
+      request(app.getHttpServer()).get('/api/v1/transactions/export'),
+      user,
+    ).expect(200);
+    const rows = parse(exported.text, { bom: true, columns: true }) as {
+      description: string;
+    }[];
+    expect(rows[0].description).toMatch(/^' {2}=HYPERLINK/);
+    await authenticateRequest(
+      request(app.getHttpServer()).get('/api/v1/transactions/export?page=1'),
+      user,
+    ).expect(400);
+    await request(app.getHttpServer())
+      .get('/api/v1/transactions/export')
+      .expect(401);
+    await request(app.getHttpServer())
+      .post('/api/v1/transaction-imports')
+      .expect(401);
+  });
+
+  it('documents both CSV endpoints and their authentication in Swagger', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/api/docs-json')
+      .expect(200);
+    expect(
+      response.body.paths['/api/v1/transaction-imports'].post,
+    ).toMatchObject({
+      security: [{ cookieAuth: [] }],
+      responses: { 201: {}, 400: {}, 401: {} },
+      requestBody: { content: { 'multipart/form-data': {} } },
+    });
+    expect(
+      response.body.paths['/api/v1/transactions/export'].get,
+    ).toMatchObject({
+      security: [{ cookieAuth: [] }],
+      responses: { 200: {}, 400: {}, 401: {} },
+    });
   });
 });

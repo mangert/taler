@@ -20,6 +20,7 @@ import { TransactionCardList } from '../features/transactions/TransactionCardLis
 import { PaginationControls } from '../features/transactions/PaginationControls';
 import { TransactionFormDialog } from '../features/transactions/TransactionFormDialog';
 import { DeleteTransactionDialog } from '../features/transactions/DeleteTransactionDialog';
+import { ExportTransactionsButton } from '../features/transactions/ExportTransactionsButton';
 import type { TransactionFormValues } from '../features/transactions/transaction-schema';
 import type {
   Transaction,
@@ -260,6 +261,12 @@ export function TransactionsPage() {
             setSearchParams(new URLSearchParams(), { replace: true })
           }
         />
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+          <Button component={Link} to="/transaction-imports" variant="outlined">
+            Импорт CSV
+          </Button>
+          <ExportTransactionsButton filters={params} />
+        </Stack>
         {transactionsQuery.isPending ? (
           <Stack role="status" aria-label="Загрузка транзакций" spacing={2}>
             <Skeleton variant="rounded" height={80} />

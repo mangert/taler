@@ -38,7 +38,7 @@ export async function apiRequest<T>(
     ...init,
     credentials: 'include',
     headers: {
-      ...(init.body === undefined
+      ...(init.body === undefined || init.body instanceof FormData
         ? {}
         : { 'Content-Type': 'application/json' }),
       ...init.headers,
@@ -65,4 +65,24 @@ export async function apiRequest<T>(
   }
 
   return body as T;
+}
+
+export async function apiRequestBlob(path: string): Promise<Blob> {
+  const response = await fetch(path, { credentials: 'include' });
+  if (!response.ok) {
+    let body: unknown;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+    if (isApiErrorResponse(body)) throw new ApiError(body);
+    throw new ApiError({
+      statusCode: response.status,
+      code: 'UNEXPECTED_RESPONSE',
+      message: 'Не удалось загрузить файл',
+      details: [],
+    });
+  }
+  return response.blob();
 }

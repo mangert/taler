@@ -696,6 +696,119 @@ describe('TransactionsPage', () => {
     ).toBeInTheDocument();
   });
 
+  it('downloads CSV with current URL filters but without pagination', async () => {
+    const user = userEvent.setup();
+    const BrowserURL = URL;
+    class DownloadURL extends BrowserURL {
+      static createObjectURL = vi.fn(() => 'blob:transactions');
+      static revokeObjectURL = vi.fn();
+    }
+    vi.stubGlobal('URL', DownloadURL);
+    const clickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+    const fetchMock = vi.fn((input: string) => {
+      if (input === '/api/v1/auth/me')
+        return Promise.resolve(jsonResponse(profile));
+      if (input.startsWith('/api/v1/categories?'))
+        return Promise.resolve(
+          jsonResponse({
+            items: [category],
+            meta: { page: 1, pageSize: 100, total: 1, totalPages: 1 },
+          }),
+        );
+      if (input.startsWith('/api/v1/transactions?'))
+        return Promise.resolve(
+          jsonResponse({
+            items: [transaction],
+            meta: { page: 3, pageSize: 20, total: 41, totalPages: 3 },
+          }),
+        );
+      if (input.startsWith('/api/v1/transactions/export?'))
+        return Promise.resolve(
+          new Response('transactionDate,amount\n2026-09-21,125.50\n', {
+            headers: { 'Content-Type': 'text/csv' },
+          }),
+        );
+      throw new Error(`Unexpected request: ${input}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.replaceState(
+      {},
+      '',
+      `/transactions?search=Coffee&dateFrom=2026-09-01&categoryId=${category.id}&type=EXPENSE&page=3`,
+    );
+    render(<App />);
+
+    await screen.findByRole('table', { name: 'Транзакции' });
+    await user.click(screen.getByRole('button', { name: 'Экспорт CSV' }));
+
+    await waitFor(() => expect(clickSpy).toHaveBeenCalledTimes(1));
+    const exportRequest = fetchMock.mock.calls.find(([input]) =>
+      input.startsWith('/api/v1/transactions/export?'),
+    )?.[0];
+    expect(exportRequest).toBeDefined();
+    const params = new BrowserURL(exportRequest ?? '', 'http://localhost')
+      .searchParams;
+    expect(params.get('search')).toBe('Coffee');
+    expect(params.get('dateFrom')).toBe('2026-09-01');
+    expect(params.get('categoryId')).toBe(category.id);
+    expect(params.get('type')).toBe('EXPENSE');
+    expect(params.has('page')).toBe(false);
+    expect(params.has('pageSize')).toBe(false);
+    expect(DownloadURL.createObjectURL).toHaveBeenCalledTimes(1);
+    expect(DownloadURL.revokeObjectURL).toHaveBeenCalledWith(
+      'blob:transactions',
+    );
+  });
+
+  it('shows a recoverable error when CSV export fails', async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn((input: string) => {
+      if (input === '/api/v1/auth/me')
+        return Promise.resolve(jsonResponse(profile));
+      if (input.startsWith('/api/v1/categories?'))
+        return Promise.resolve(
+          jsonResponse({
+            items: [category],
+            meta: { page: 1, pageSize: 100, total: 1, totalPages: 1 },
+          }),
+        );
+      if (input.startsWith('/api/v1/transactions?'))
+        return Promise.resolve(
+          jsonResponse({
+            items: [],
+            meta: { page: 1, pageSize: 20, total: 0, totalPages: 0 },
+          }),
+        );
+      if (input.startsWith('/api/v1/transactions/export?'))
+        return Promise.resolve(
+          jsonResponse(
+            {
+              statusCode: 500,
+              code: 'EXPORT_FAILED',
+              message: 'Export failed',
+              details: [],
+            },
+            500,
+          ),
+        );
+      throw new Error(`Unexpected request: ${input}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.replaceState({}, '', '/transactions');
+    render(<App />);
+
+    await screen.findByText('У вас пока нет транзакций.');
+    await user.click(screen.getByRole('button', { name: 'Экспорт CSV' }));
+    expect(
+      await screen.findByText(
+        'Не удалось экспортировать CSV. Повторите попытку.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Экспорт CSV' })).toBeEnabled();
+  });
+
   it('keeps the create dialog open and focuses a server-invalid field', async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn((input: string, init?: RequestInit) => {
