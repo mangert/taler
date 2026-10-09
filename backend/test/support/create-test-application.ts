@@ -3,6 +3,7 @@ import { Test, type TestingModuleBuilder } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module.js';
 import { configureApplication } from '../../src/common/bootstrap/configure-application.js';
 import { configureSwagger } from '../../src/common/swagger/configure-swagger.js';
+import { RecurringSchedulerService } from '../../src/recurring-transactions/recurring-scheduler.service.js';
 
 export interface CreateTestApplicationOptions {
   controllers?: Type<unknown>[];
@@ -20,7 +21,9 @@ export async function createTestApplication(
     imports: [AppModule],
     controllers: options.controllers ?? [],
     providers: options.providers ?? [],
-  });
+  })
+    .overrideProvider(RecurringSchedulerService)
+    .useValue({});
   const configuredModuleBuilder =
     options.configureModule?.(moduleBuilder) ?? moduleBuilder;
   const moduleFixture = await configuredModuleBuilder.compile();

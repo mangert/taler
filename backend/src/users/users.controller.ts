@@ -38,7 +38,8 @@ export class UsersController {
     type: ApiErrorResponseDto,
   })
   @ApiConflictResponse({
-    description: 'Base currency cannot be changed after the first transaction',
+    description:
+      'Base currency cannot be changed after a transaction, budget or recurring rule exists',
     type: ApiErrorResponseDto,
   })
   updateProfile(

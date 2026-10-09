@@ -8,6 +8,11 @@ import {
   PrismaClient,
   TransactionType,
 } from '../src/generated/prisma/client.js';
+import {
+  followingOccurrence,
+  localDate,
+  nextOccurrence,
+} from '../src/recurring-transactions/recurrence.js';
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -47,27 +52,20 @@ const dateWithinMonth = (
   return new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), day));
 };
 
-const nextRunAt = (source: Date, dayOfMonth: number): Date => {
-  const useNextMonth = source.getUTCDate() >= dayOfMonth;
-  const month = new Date(
-    Date.UTC(
-      source.getUTCFullYear(),
-      source.getUTCMonth() + (useNextMonth ? 1 : 0),
-      1,
-    ),
+const nextRunAt = (
+  source: Date,
+  dayOfMonth: number,
+  timeZone: string,
+): Date => {
+  const occurrence = nextOccurrence(
+    localDate(source, timeZone),
+    dayOfMonth,
+    timeZone,
   );
-  const lastDay = new Date(
-    Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + 1, 0),
-  ).getUTCDate();
-
-  return new Date(
-    Date.UTC(
-      month.getUTCFullYear(),
-      month.getUTCMonth(),
-      Math.min(dayOfMonth, lastDay),
-      9,
-    ),
-  );
+  return occurrence.nextRunAt > source
+    ? occurrence.nextRunAt
+    : followingOccurrence(occurrence.scheduledDate, dayOfMonth, timeZone)
+        .nextRunAt;
 };
 
 const now = new Date();
@@ -208,7 +206,7 @@ const recurringRules = [
     description: 'Ежемесячная зарплата',
     dayOfMonth: 5,
     startDate: startOfMonth(now, 5),
-    nextRunAt: nextRunAt(now, 5),
+    nextRunAt: nextRunAt(now, 5, 'Europe/Moscow'),
     isActive: true,
   },
   {
@@ -222,7 +220,7 @@ const recurringRules = [
     description: 'Аренда квартиры',
     dayOfMonth: 1,
     startDate: startOfMonth(now, 5),
-    nextRunAt: nextRunAt(now, 1),
+    nextRunAt: nextRunAt(now, 1, 'Europe/Moscow'),
     isActive: true,
   },
   {
@@ -236,7 +234,7 @@ const recurringRules = [
     description: 'Общий доход семьи',
     dayOfMonth: 25,
     startDate: startOfMonth(now, 5),
-    nextRunAt: nextRunAt(now, 25),
+    nextRunAt: nextRunAt(now, 25, 'Europe/Amsterdam'),
     isActive: true,
   },
   {
@@ -250,7 +248,7 @@ const recurringRules = [
     description: 'Коммунальные услуги',
     dayOfMonth: 15,
     startDate: startOfMonth(now, 5),
-    nextRunAt: nextRunAt(now, 15),
+    nextRunAt: nextRunAt(now, 15, 'Europe/Amsterdam'),
     isActive: true,
   },
 ] satisfies Prisma.RecurringTransactionCreateManyInput[];

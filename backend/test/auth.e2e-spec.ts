@@ -323,7 +323,7 @@ describe('authentication and profile (e2e)', () => {
       statusCode: 409,
       code: 'BASE_CURRENCY_LOCKED',
       message:
-        'Base currency cannot be changed after the first transaction or budget',
+        'Base currency cannot be changed after the first transaction, budget or recurring rule',
       details: [],
     });
     expect(fakePrisma.getUsers()[0]).toMatchObject({

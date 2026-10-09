@@ -33,6 +33,13 @@ export function HomePage() {
           <Button component={Link} to={'/budgets'} variant={'outlined'}>
             Бюджеты
           </Button>
+          <Button
+            component={Link}
+            to="/recurring-transactions"
+            variant="outlined"
+          >
+            Повторяющиеся транзакции
+          </Button>
           <Button component={Link} to="/transactions" variant="outlined">
             Транзакции
           </Button>

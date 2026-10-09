@@ -6,6 +6,10 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import {
+  localDate,
+  nextOccurrence,
+} from '../recurring-transactions/recurrence.js';
 import { UpdateProfileDto } from './dto/update-profile.dto.js';
 import { UserResponseDto } from './dto/user-response.dto.js';
 import { toUserResponse, userProfileSelect } from './user-profile.js';
@@ -34,16 +38,18 @@ export class UsersService {
       dto.baseCurrency !== undefined &&
       dto.baseCurrency !== existingUser.baseCurrency
     ) {
-      const [transactionCount, budgetCount] = await Promise.all([
-        this.prisma.transaction.count({ where: { userId } }),
-        this.prisma.budget.count({ where: { userId } }),
-      ]);
+      const [transactionCount, budgetCount, recurringRuleCount] =
+        await Promise.all([
+          this.prisma.transaction.count({ where: { userId } }),
+          this.prisma.budget.count({ where: { userId } }),
+          this.prisma.recurringTransaction.count({ where: { userId } }),
+        ]);
 
-      if (transactionCount + budgetCount > 0) {
+      if (transactionCount + budgetCount + recurringRuleCount > 0) {
         throw new ConflictException({
           code: 'BASE_CURRENCY_LOCKED',
           message:
-            'Base currency cannot be changed after the first transaction or budget',
+            'Base currency cannot be changed after the first transaction, budget or recurring rule',
         });
       }
     }
@@ -69,11 +75,39 @@ export class UsersService {
       });
     }
 
-    const updatedUser = await this.prisma.user.update({
-      where: { id: userId },
-      data,
-      select: userProfileSelect,
-    });
+    const timeZoneChanged =
+      dto.timeZone !== undefined && dto.timeZone !== existingUser.timeZone;
+    const updatedUser = timeZoneChanged
+      ? await this.prisma.$transaction(async (client) => {
+          const rules = await client.recurringTransaction.findMany({
+            where: { userId },
+          });
+          for (const rule of rules) {
+            const scheduledDate = localDate(
+              rule.nextRunAt,
+              existingUser.timeZone,
+            );
+            const occurrence = nextOccurrence(
+              scheduledDate,
+              rule.dayOfMonth,
+              dto.timeZone!,
+            );
+            await client.recurringTransaction.update({
+              where: { id: rule.id, userId },
+              data: { nextRunAt: occurrence.nextRunAt },
+            });
+          }
+          return client.user.update({
+            where: { id: userId },
+            data,
+            select: userProfileSelect,
+          });
+        })
+      : await this.prisma.user.update({
+          where: { id: userId },
+          data,
+          select: userProfileSelect,
+        });
 
     return toUserResponse(updatedUser);
   }

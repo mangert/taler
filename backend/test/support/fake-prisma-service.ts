@@ -43,6 +43,7 @@ export class FakePrismaService {
   private readonly users: FakeUser[] = [];
   private readonly transactionUserIds: string[] = [];
   private readonly budgetUserIds: string[] = [];
+  private readonly recurringRuleUserIds: string[] = [];
 
   readonly user = {
     findUnique: async (
@@ -96,12 +97,30 @@ export class FakePrismaService {
         .length,
   };
 
+  readonly recurringTransaction = {
+    count: async (arguments_: CountTransactionArguments): Promise<number> =>
+      this.recurringRuleUserIds.filter(
+        (userId) => userId === arguments_.where.userId,
+      ).length,
+    findMany: async (): Promise<[]> => [],
+  };
+
+  async $transaction<T>(
+    callback: (client: FakePrismaService) => Promise<T>,
+  ): Promise<T> {
+    return callback(this);
+  }
+
   addTransaction(userId: string): void {
     this.transactionUserIds.push(userId);
   }
 
   addBudget(userId: string): void {
     this.budgetUserIds.push(userId);
+  }
+
+  addRecurringRule(userId: string): void {
+    this.recurringRuleUserIds.push(userId);
   }
 
   getUsers(): FakeUser[] {

@@ -267,6 +267,43 @@ export interface paths {
         patch: operations["BudgetsController_update"];
         trace?: never;
     };
+    "/api/v1/recurring-transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List owned recurring transaction rules */
+        get: operations["RecurringTransactionsController_list"];
+        put?: never;
+        /** Create an owned monthly recurring transaction rule */
+        post: operations["RecurringTransactionsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recurring-transactions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get an owned recurring transaction rule */
+        get: operations["RecurringTransactionsController_get"];
+        put?: never;
+        post?: never;
+        /** Delete an owned recurring transaction rule */
+        delete: operations["RecurringTransactionsController_remove"];
+        options?: never;
+        head?: never;
+        /** Update or pause an owned recurring transaction rule */
+        patch: operations["RecurringTransactionsController_update"];
+        trace?: never;
+    };
     "/api/v1/dashboard": {
         parameters: {
             query?: never;
@@ -614,6 +651,104 @@ export interface components {
             /** @example 500.0000 */
             limitAmount?: string;
         };
+        RecurringTransactionResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            categoryId: string;
+            /** @enum {string} */
+            type: "INCOME" | "EXPENSE";
+            /** @example 12.3456 */
+            amount: string;
+            /** @example EUR */
+            currency: string;
+            /** @example 1.00000000 */
+            exchangeRateToBase: string;
+            description: string | null;
+            dayOfMonth: number;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string | null;
+            /**
+             * Format: date-time
+             * @description UTC instant of midnight in the user time zone
+             */
+            nextRunAt: string;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        RecurringTransactionListMetaDto: {
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            pageSize: number;
+            /** @example 1 */
+            total: number;
+            /** @example 1 */
+            totalPages: number;
+        };
+        RecurringTransactionListResponseDto: {
+            items: components["schemas"]["RecurringTransactionResponseDto"][];
+            meta: components["schemas"]["RecurringTransactionListMetaDto"];
+        };
+        CreateRecurringTransactionDto: {
+            /** Format: uuid */
+            categoryId: string;
+            /** @enum {string} */
+            type: "INCOME" | "EXPENSE";
+            /** @example 12.3456 */
+            amount: string;
+            /** @example EUR */
+            currency: string;
+            /** @example 1.00000000 */
+            exchangeRateToBase: string;
+            /** @example 31 */
+            dayOfMonth: number;
+            /**
+             * Format: date
+             * @example 2028-02-01
+             */
+            startDate: string;
+            /**
+             * Format: date
+             * @example 2028-12-31
+             */
+            endDate?: string | null;
+            description?: string | null;
+            /** @description Defaults to true when omitted on creation */
+            isActive?: boolean;
+        };
+        UpdateRecurringTransactionDto: {
+            /** Format: uuid */
+            categoryId?: string;
+            /** @enum {string} */
+            type?: "INCOME" | "EXPENSE";
+            /** @example 12.3456 */
+            amount?: string;
+            /** @example EUR */
+            currency?: string;
+            /** @example 1.00000000 */
+            exchangeRateToBase?: string;
+            /** @example 31 */
+            dayOfMonth?: number;
+            /**
+             * Format: date
+             * @example 2028-02-01
+             */
+            startDate?: string;
+            /**
+             * Format: date
+             * @example 2028-12-31
+             */
+            endDate?: string | null;
+            description?: string | null;
+            /** @description Defaults to true when omitted on creation */
+            isActive?: boolean;
+        };
         DashboardTotalsDto: {
             /** @example 1000.0000 */
             income: string;
@@ -894,7 +1029,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Base currency cannot be changed after the first transaction */
+            /** @description Base currency cannot be changed after a transaction, budget or recurring rule exists */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -1704,6 +1839,212 @@ export interface operations {
                 };
             };
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    RecurringTransactionsController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecurringTransactionListResponseDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    RecurringTransactionsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRecurringTransactionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecurringTransactionResponseDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    RecurringTransactionsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecurringTransactionResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    RecurringTransactionsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+        };
+    };
+    RecurringTransactionsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRecurringTransactionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecurringTransactionResponseDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

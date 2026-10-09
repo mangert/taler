@@ -14,6 +14,7 @@ import { TransactionsPage } from '../pages/TransactionsPage';
 import { TransactionImportPage } from '../pages/TransactionImportPage';
 import { AuditLogPage } from '../pages/AuditLogPage';
 import { BudgetsPage } from '../pages/BudgetsPage';
+import { RecurringTransactionsPage } from '../pages/RecurringTransactionsPage';
 import { createAppQueryClient } from './query-client';
 import { appTheme } from './theme';
 
@@ -26,6 +27,10 @@ export function AppRoutes() {
       </Route>
       <Route element={<ProtectedRoute />}>
         <Route path={'/budgets'} element={<BudgetsPage />} />
+        <Route
+          path="/recurring-transactions"
+          element={<RecurringTransactionsPage />}
+        />
         <Route path="/" element={<HomePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/categories" element={<CategoriesPage />} />
