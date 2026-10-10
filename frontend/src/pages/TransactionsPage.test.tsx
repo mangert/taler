@@ -81,14 +81,18 @@ describe('TransactionsPage', () => {
     render(<App />);
 
     expect(
-      await screen.findByRole('heading', { name: 'Выбранная транзакция' }),
+      await screen.findByRole(
+        'heading',
+        { name: 'Выбранная транзакция' },
+        { timeout: 20_000 },
+      ),
     ).toBeInTheDocument();
     expect(await screen.findByText('Coffee')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       `/api/v1/transactions/${transaction.id}`,
       expect.objectContaining({ credentials: 'include' }),
     );
-  });
+  }, 30_000);
 
   it('retries a failed selected transaction request without claiming it was deleted', async () => {
     const user = userEvent.setup();

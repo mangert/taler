@@ -18,6 +18,68 @@ describe('App', () => {
     window.history.replaceState({}, '', '/');
   });
 
+  it('renders the protected app shell after authentication', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify(userProfile), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      ),
+    );
+    window.history.replaceState({}, '', '/profile');
+    render(<App />);
+
+    expect(
+      await screen.findByRole(
+        'heading',
+        { name: 'Профиль' },
+        { timeout: 20_000 },
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('banner')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Меню пользователя: Личный' }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Открыть навигацию' }));
+    expect(
+      screen.getByRole('navigation', { name: 'Основная навигация' }),
+    ).toBeInTheDocument();
+  }, 30_000);
+
+  it('opens the user menu and logs out from a protected page', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((input: string) => {
+        if (input === '/api/v1/auth/me')
+          return Promise.resolve(
+            new Response(JSON.stringify(userProfile), {
+              headers: { 'Content-Type': 'application/json' },
+            }),
+          );
+        if (input === '/api/v1/auth/logout')
+          return Promise.resolve(new Response(null, { status: 204 }));
+        throw new Error(`Unexpected request: ${input}`);
+      }),
+    );
+    window.history.replaceState({}, '', '/profile');
+    render(<App />);
+
+    await screen.findByRole('heading', { name: 'Профиль' });
+    await user.click(
+      screen.getByRole('button', { name: 'Меню пользователя: Личный' }),
+    );
+    await user.click(screen.getByRole('menuitem', { name: 'Выйти' }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Вход в Taler' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('banner')).toBeNull();
+  });
+
   it('shows login and registration routes when there is no session', async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn().mockResolvedValue(
@@ -437,5 +499,30 @@ describe('App', () => {
         credentials: 'include',
       }),
     );
+  });
+  it('puts a skip link before the protected navigation for keyboard users', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify(userProfile), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      ),
+    );
+    window.history.replaceState({}, '', '/profile');
+    render(<App />);
+
+    expect(
+      await screen.findByRole('heading', { name: 'Профиль', level: 1 }),
+    ).toBeInTheDocument();
+    await user.tab();
+    const skipLink = screen.getByRole('link', {
+      name: 'Перейти к содержимому',
+    });
+    expect(skipLink).toHaveFocus();
+    expect(skipLink).toHaveAttribute('href', '#main-content');
+    expect(document.getElementById('main-content')).toBeInTheDocument();
   });
 });

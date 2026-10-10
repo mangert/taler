@@ -6,6 +6,8 @@ export function AuthLayout() {
   return (
     <Box
       component="main"
+      id="main-content"
+      tabIndex={-1}
       sx={{
         alignItems: 'center',
         bgcolor: 'background.default',

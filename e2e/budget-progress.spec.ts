@@ -146,7 +146,7 @@ async function installMockBudgetApi(
 test('updates budget progress after creating an expense through the UI', async ({
   page,
 }, testInfo) => {
-  const mockApi = testInfo.project.name === 'mock-chromium';
+  const mockApi = testInfo.project.name.startsWith('mock-');
   const categoryName = `Budget E2E ${randomUUID().slice(0, 8)}`;
   let categoryId: string | null = null;
   let budgetId: string | null = null;
@@ -158,16 +158,25 @@ test('updates budget progress after creating an expense through the UI', async (
       await installMockBudgetApi(page, categoryId, categoryName);
     } else {
       await signIn(page);
-      const response = await page.request.post('/api/v1/categories', {
-        data: {
-          name: categoryName,
-          icon: 'shopping_cart',
-          color: '#2E7D32',
-          type: 'EXPENSE',
-        },
-      });
-      expect(response.status()).toBe(201);
-      categoryId = ((await response.json()) as { id: string }).id;
+      const created = await page.evaluate(async (name) => {
+        const response = await fetch('/api/v1/categories', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            icon: 'shopping_cart',
+            color: '#2E7D32',
+            type: 'EXPENSE',
+          }),
+        });
+        return {
+          status: response.status,
+          body: (await response.json()) as { id: string },
+        };
+      }, categoryName);
+      expect(created.status).toBe(201);
+      categoryId = created.body.id;
     }
 
     await page.goto(`/budgets?month=${month}`);
@@ -240,22 +249,43 @@ test('updates budget progress after creating an expense through the UI', async (
   } finally {
     if (!mockApi) {
       if (transactionId) {
-        const response = await page.request.delete(
-          `/api/v1/transactions/${transactionId}`,
+        const status = await page.evaluate(
+          async (id) =>
+            (
+              await fetch(`/api/v1/transactions/${id}`, {
+                method: 'DELETE',
+                credentials: 'include',
+              })
+            ).status,
+          transactionId,
         );
-        expect([204, 404]).toContain(response.status());
+        expect([204, 404]).toContain(status);
       }
       if (budgetId) {
-        const response = await page.request.delete(
-          `/api/v1/budgets/${budgetId}`,
+        const status = await page.evaluate(
+          async (id) =>
+            (
+              await fetch(`/api/v1/budgets/${id}`, {
+                method: 'DELETE',
+                credentials: 'include',
+              })
+            ).status,
+          budgetId,
         );
-        expect([204, 404]).toContain(response.status());
+        expect([204, 404]).toContain(status);
       }
       if (categoryId) {
-        const response = await page.request.delete(
-          `/api/v1/categories/${categoryId}`,
+        const status = await page.evaluate(
+          async (id) =>
+            (
+              await fetch(`/api/v1/categories/${id}`, {
+                method: 'DELETE',
+                credentials: 'include',
+              })
+            ).status,
+          categoryId,
         );
-        expect([204, 404]).toContain(response.status());
+        expect([204, 404]).toContain(status);
       }
     }
   }

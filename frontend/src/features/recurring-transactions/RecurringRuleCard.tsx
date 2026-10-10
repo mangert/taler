@@ -42,7 +42,7 @@ export function RecurringRuleCard({
             spacing={1}
             sx={{ alignItems: 'center', flexWrap: 'wrap' }}
           >
-            <Typography component="h3" variant="h6">
+            <Typography component="h2" variant="h6">
               {categoryName}
             </Typography>
             <RecurringRuleStatus isActive={rule.isActive} />

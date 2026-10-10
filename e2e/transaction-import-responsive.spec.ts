@@ -24,11 +24,12 @@ for (const viewport of [
   test(`keeps CSV mapping usable on ${viewport.name}`, async ({
     page,
   }, testInfo) => {
+    test.skip(!testInfo.project.name.endsWith(viewport.name));
     await page.setViewportSize({
       width: viewport.width,
       height: viewport.height,
     });
-    if (testInfo.project.name === 'mock-chromium') {
+    if (testInfo.project.name.startsWith('mock-')) {
       await installMockTransactionApi(page);
     }
     await signIn(page);

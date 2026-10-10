@@ -125,9 +125,7 @@ describe('AuditLogPage', () => {
     expect(
       await screen.findByText('В журнале пока нет изменений.'),
     ).toBeInTheDocument();
-    await user.click(
-      screen.getByRole('link', { name: 'Вернуться на главную' }),
-    );
+    await user.click(screen.getByRole('button', { name: 'Открыть навигацию' }));
     await user.click(screen.getByRole('link', { name: 'Транзакции' }));
     await screen.findByRole('table', { name: 'Транзакции' });
     await user.click(
@@ -139,10 +137,8 @@ describe('AuditLogPage', () => {
     expect(
       await screen.findByText('У вас пока нет транзакций.'),
     ).toBeInTheDocument();
-    await user.click(
-      screen.getByRole('link', { name: 'Вернуться на главную' }),
-    );
-    await user.click(screen.getByRole('link', { name: 'Журнал изменений' }));
+    await user.click(screen.getByRole('button', { name: 'Открыть навигацию' }));
+    await user.click(screen.getByRole('link', { name: 'Журнал' }));
 
     expect(
       await screen.findByRole('table', { name: 'Журнал изменений' }),

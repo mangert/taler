@@ -1,5 +1,5 @@
 import { Alert, Box, Button, Stack, Typography } from '@mui/material';
-import { useRef } from 'react';
+import { useId, useRef } from 'react';
 
 interface CsvFileStepProps {
   file: File | null;
@@ -17,6 +17,9 @@ export function CsvFileStep({
   onContinue,
 }: CsvFileStepProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const descriptionId = useId();
+  const errorId = useId();
+  const describedBy = error ? `${descriptionId} ${errorId}` : descriptionId;
   const openFilePicker = () => {
     if (!pending) fileInputRef.current?.click();
   };
@@ -30,12 +33,18 @@ export function CsvFileStep({
       {pending ? (
         <Typography role="status">Читаем образец CSV…</Typography>
       ) : null}
-      {error ? <Alert severity="error">{error}</Alert> : null}
+      {error ? (
+        <Alert id={errorId} severity="error">
+          {error}
+        </Alert>
+      ) : null}
       <Box
         component="div"
         role="button"
         tabIndex={pending ? -1 : 0}
         aria-label="Зона загрузки CSV"
+        aria-describedby={describedBy}
+        aria-invalid={Boolean(error)}
         aria-disabled={pending}
         onClick={openFilePicker}
         onKeyDown={(event) => {
@@ -70,13 +79,14 @@ export function CsvFileStep({
           },
         }}
       >
-        <Typography>
+        <Typography id={descriptionId}>
           Перетащите CSV-файл сюда или нажмите, чтобы выбрать
         </Typography>
       </Box>
       <input
         ref={fileInputRef}
         aria-label="CSV-файл"
+        aria-describedby={describedBy}
         type="file"
         tabIndex={-1}
         disabled={pending}
@@ -100,6 +110,7 @@ export function CsvFileStep({
       />
       <Button
         variant="outlined"
+        aria-describedby={describedBy}
         onClick={openFilePicker}
         disabled={pending}
         sx={{ alignSelf: { xs: 'stretch', sm: 'flex-start' } }}

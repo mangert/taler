@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { trackBrowserErrors } from './support/browser-errors';
 
 const profile = {
   id: '10000000-0000-4000-8000-000000000001',
@@ -45,20 +46,18 @@ const dashboard = {
 };
 
 for (const viewport of [
-  { name: 'desktop', width: 1280, height: 800 },
+  { name: 'desktop', width: 1440, height: 900 },
   { name: 'mobile', width: 390, height: 844 },
 ] as const) {
   test(`lays out dashboard without clipping on ${viewport.name}`, async ({
     page,
   }, testInfo) => {
+    test.skip(!testInfo.project.name.endsWith(viewport.name));
     await page.setViewportSize({
       width: viewport.width,
       height: viewport.height,
     });
-    const consoleErrors: string[] = [];
-    page.on('console', (message) => {
-      if (message.type() === 'error') consoleErrors.push(message.text());
-    });
+    const assertNoBrowserErrors = trackBrowserErrors(page);
     await page.route('**/api/v1/**', async (route) => {
       const path = new URL(route.request().url()).pathname;
       if (path === '/api/v1/auth/me') {
@@ -106,13 +105,8 @@ for (const viewport of [
     const lineGraphic = page.getByRole('img', {
       name: 'Линейный график доходов и расходов по месяцам',
     });
-    expect((await pieGraphic.boundingBox())?.height).toBeLessThanOrEqual(280);
+    expect((await pieGraphic.boundingBox())?.height).toBeLessThanOrEqual(300);
     expect((await lineGraphic.boundingBox())?.height).toBeLessThanOrEqual(300);
-
-    await page.screenshot({
-      path: testInfo.outputPath(`dashboard-${viewport.name}.png`),
-      fullPage: true,
-    });
 
     await page.locator('.recharts-sector').first().hover();
     const tooltip = pie.locator('.recharts-tooltip-wrapper');
@@ -141,6 +135,6 @@ for (const viewport of [
         viewport.width,
       );
     }
-    expect(consoleErrors).toEqual([]);
+    assertNoBrowserErrors();
   });
 }

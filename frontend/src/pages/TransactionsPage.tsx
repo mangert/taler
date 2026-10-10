@@ -3,13 +3,13 @@ import {
   Box,
   Button,
   Container,
-  Skeleton,
   Stack,
   Typography,
 } from '@mui/material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { EmptyState, ErrorState, PageSkeleton } from '../shared/ui/PageStates';
 import { useAuth } from '../features/auth/auth-context';
 import {
   TransactionsFilterBar,
@@ -186,16 +186,10 @@ export function TransactionsPage() {
           </Button>
         </Stack>
         {categoriesQuery.isError ? (
-          <Alert
-            severity="error"
-            action={
-              <Button onClick={() => void categoriesQuery.refetch()}>
-                Повторить
-              </Button>
-            }
-          >
-            Не удалось загрузить категории.
-          </Alert>
+          <ErrorState
+            message="Не удалось загрузить категории."
+            onRetry={() => void categoriesQuery.refetch()}
+          />
         ) : null}
         {selectedTransactionId ? (
           <Box component="section" aria-label="Выбранная транзакция">
@@ -268,27 +262,20 @@ export function TransactionsPage() {
           <ExportTransactionsButton filters={params} />
         </Stack>
         {transactionsQuery.isPending ? (
-          <Stack role="status" aria-label="Загрузка транзакций" spacing={2}>
-            <Skeleton variant="rounded" height={80} />
-            <Skeleton variant="rounded" height={80} />
-          </Stack>
+          <PageSkeleton label="Загрузка транзакций" heights={[80, 80]} />
         ) : transactionsQuery.isError ? (
-          <Alert
-            severity="error"
-            action={
-              <Button onClick={() => void transactionsQuery.refetch()}>
-                Повторить
-              </Button>
-            }
-          >
-            Не удалось загрузить транзакции.
-          </Alert>
+          <ErrorState
+            message="Не удалось загрузить транзакции."
+            onRetry={() => void transactionsQuery.refetch()}
+          />
         ) : transactionsQuery.data.items.length === 0 ? (
-          <Alert severity="info">
-            {hasFilters
-              ? 'По вашим фильтрам транзакции не найдены.'
-              : 'У вас пока нет транзакций.'}
-          </Alert>
+          <EmptyState
+            message={
+              hasFilters
+                ? 'По вашим фильтрам транзакции не найдены.'
+                : 'У вас пока нет транзакций.'
+            }
+          />
         ) : (
           <Stack spacing={2}>
             <Box sx={{ display: { xs: 'none', md: 'block' } }}>

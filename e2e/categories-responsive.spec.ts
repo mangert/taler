@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { trackBrowserErrors } from './support/browser-errors';
 
 const profile = {
   id: '10000000-0000-4000-8000-000000000001',
@@ -59,6 +60,7 @@ test.beforeEach(async ({ page }) => {
 test('keeps category names and icons visible in desktop and mobile grids', async ({
   page,
 }) => {
+  const assertNoBrowserErrors = trackBrowserErrors(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/categories');
   const cards = page.locator('article');
@@ -100,9 +102,11 @@ test('keeps category names and icons visible in desktop and mobile grids', async
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(390);
+  assertNoBrowserErrors();
 });
 
 test('opens the category form across the mobile viewport', async ({ page }) => {
+  const assertNoBrowserErrors = trackBrowserErrors(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/categories');
   await page.getByRole('button', { name: 'Добавить категорию' }).click();
@@ -123,4 +127,5 @@ test('opens the category form across the mobile viewport', async ({ page }) => {
   await expect
     .poll(async () => (await dialog.boundingBox())?.width ?? 0)
     .toBeLessThan(700);
+  assertNoBrowserErrors();
 });

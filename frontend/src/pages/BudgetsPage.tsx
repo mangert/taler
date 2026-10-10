@@ -3,7 +3,6 @@ import {
   Button,
   Container,
   Pagination,
-  Skeleton,
   Stack,
   Typography,
 } from '@mui/material';
@@ -21,6 +20,7 @@ import type { BudgetFormValues } from '../features/budgets/budget-schema';
 import { useAuth } from '../features/auth/auth-context';
 import { budgetsApi, type Budget } from '../shared/api/budgets';
 import { categoriesApi } from '../shared/api/categories';
+import { EmptyState, ErrorState, PageSkeleton } from '../shared/ui/PageStates';
 
 const pageSize = 20;
 
@@ -135,28 +135,17 @@ export function BudgetsPage() {
           </Alert>
         ) : null}
         {budgetsQuery.isPending || categoriesQuery.isPending ? (
-          <Stack role={'status'} aria-label={'Загрузка бюджетов'} spacing={2}>
-            <Skeleton variant={'rounded'} height={150} />
-            <Skeleton variant={'rounded'} height={150} />
-          </Stack>
+          <PageSkeleton label="Загрузка бюджетов" heights={[150, 150]} />
         ) : budgetsQuery.isError || categoriesQuery.isError ? (
-          <Alert
-            severity={'error'}
-            action={
-              <Button
-                onClick={() => {
-                  void budgetsQuery.refetch();
-                  void categoriesQuery.refetch();
-                }}
-              >
-                Повторить
-              </Button>
-            }
-          >
-            Не удалось загрузить бюджеты.
-          </Alert>
+          <ErrorState
+            message="Не удалось загрузить бюджеты."
+            onRetry={() => {
+              void budgetsQuery.refetch();
+              void categoriesQuery.refetch();
+            }}
+          />
         ) : budgetsQuery.data.items.length === 0 ? (
-          <Alert severity={'info'}>На этот месяц бюджетов пока нет.</Alert>
+          <EmptyState message="На этот месяц бюджетов пока нет." />
         ) : (
           <>
             <BudgetGrid

@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Skeleton, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { DashboardTextSummary } from '../features/dashboard/DashboardTextSummary';
 import { ExpensesPieChart } from '../features/dashboard/ExpensesPieChart';
@@ -9,6 +9,7 @@ import { dashboardKeys } from '../features/dashboard/dashboard-keys';
 import { toDashboardViewModel } from '../features/dashboard/dashboard-view-model';
 import { useAuth } from '../features/auth/auth-context';
 import { dashboardApi, type Dashboard } from '../shared/api/dashboard';
+import { ErrorState, PageSkeleton } from '../shared/ui/PageStates';
 
 const months = 6;
 
@@ -32,23 +33,12 @@ export function DashboardPage() {
         Финансовая сводка
       </Typography>
       {query.isPending ? (
-        <Stack
-          role={'status'}
-          aria-label={'Загрузка финансовой сводки'}
-          spacing={2}
-        >
-          <Skeleton variant={'rounded'} height={100} />
-          <Skeleton variant={'rounded'} height={260} />
-        </Stack>
+        <PageSkeleton label="Загрузка финансовой сводки" heights={[100, 260]} />
       ) : query.isError ? (
-        <Alert
-          severity={'error'}
-          action={
-            <Button onClick={() => void query.refetch()}>Повторить</Button>
-          }
-        >
-          Не удалось загрузить финансовую сводку.
-        </Alert>
+        <ErrorState
+          message="Не удалось загрузить финансовую сводку."
+          onRetry={() => void query.refetch()}
+        />
       ) : (
         <DashboardContent dashboard={query.data} />
       )}

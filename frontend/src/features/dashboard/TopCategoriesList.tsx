@@ -1,4 +1,5 @@
 import { Box, List, ListItem, Paper, Typography } from '@mui/material';
+import { dashboardPanelSx } from './dashboard-layout';
 import type { CategoryChartPoint } from './dashboard-view-model';
 import { formatDashboardAmount } from './dashboard-view-model';
 
@@ -12,9 +13,9 @@ export function TopCategoriesList({ data, currency }: Props) {
     <Paper
       component={'section'}
       aria-label={'Топ категорий'}
-      sx={{ p: 2, minWidth: 0, overflowWrap: 'anywhere' }}
+      sx={{ ...dashboardPanelSx, overflowWrap: 'anywhere' }}
     >
-      <Typography component={'h2'} variant={'h6'}>
+      <Typography component={'h3'} variant={'h6'}>
         Топ категорий
       </Typography>
       {data.length === 0 ? (

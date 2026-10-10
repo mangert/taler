@@ -1,9 +1,11 @@
 import { Box, List, ListItem, Paper, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import {
   formatDashboardAmount,
   type CategoryChartPoint,
 } from './dashboard-view-model';
+import { dashboardChartViewportSx, dashboardPanelSx } from './dashboard-layout';
 
 interface Props {
   data: CategoryChartPoint[];
@@ -11,13 +13,14 @@ interface Props {
 }
 
 export function ExpensesPieChart({ data, currency }: Props) {
+  const theme = useTheme();
   return (
     <Paper
       component={'section'}
       aria-label={'Расходы по категориям'}
-      sx={{ p: 2, minWidth: 0 }}
+      sx={dashboardPanelSx}
     >
-      <Typography component={'h2'} variant={'h6'} gutterBottom>
+      <Typography component={'h3'} variant={'h6'} gutterBottom>
         Расходы по категориям
       </Typography>
       {data.length === 0 || data.every((item) => item.value === 0) ? (
@@ -26,7 +29,7 @@ export function ExpensesPieChart({ data, currency }: Props) {
         <Box
           role={'img'}
           aria-label={'Круговая диаграмма расходов по категориям'}
-          sx={{ height: { xs: 240, sm: 280 }, maxHeight: 280, minWidth: 0 }}
+          sx={dashboardChartViewportSx}
         >
           <ResponsiveContainer width={'100%'} height={'100%'}>
             <PieChart>
@@ -51,10 +54,15 @@ export function ExpensesPieChart({ data, currency }: Props) {
                   zIndex: 1,
                 }}
                 contentStyle={{
+                  backgroundColor: theme.palette.background.paper,
+                  borderColor: theme.palette.divider,
+                  borderRadius: theme.shape.borderRadius,
+                  color: theme.palette.text.primary,
                   maxWidth: '100%',
                   whiteSpace: 'normal',
                   overflowWrap: 'anywhere',
                 }}
+                labelStyle={{ color: theme.palette.text.primary }}
                 formatter={(value, name) => [
                   formatDashboardAmount(
                     data.find((item) => item.name === String(name))?.amount ??

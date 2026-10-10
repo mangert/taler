@@ -14,6 +14,7 @@ import {
   formatDashboardAmount,
   type MonthlyChartPoint,
 } from './dashboard-view-model';
+import { dashboardChartViewportSx, dashboardPanelSx } from './dashboard-layout';
 
 interface Props {
   data: MonthlyChartPoint[];
@@ -26,9 +27,9 @@ export function MonthlyDynamicsChart({ data, currency }: Props) {
     <Paper
       component={'section'}
       aria-label={'Динамика по месяцам'}
-      sx={{ p: 2, minWidth: 0 }}
+      sx={dashboardPanelSx}
     >
-      <Typography component={'h2'} variant={'h6'} gutterBottom>
+      <Typography component={'h3'} variant={'h6'} gutterBottom>
         Динамика по месяцам
       </Typography>
       {data.length === 0 ||
@@ -38,15 +39,26 @@ export function MonthlyDynamicsChart({ data, currency }: Props) {
         <Box
           role={'img'}
           aria-label={'Линейный график доходов и расходов по месяцам'}
-          sx={{ height: { xs: 260, sm: 300 }, maxHeight: 300, minWidth: 0 }}
+          sx={dashboardChartViewportSx}
         >
           <ResponsiveContainer width={'100%'} height={'100%'}>
             <LineChart data={data}>
-              <CartesianGrid strokeDasharray={'3 3'} />
-              <XAxis dataKey={'label'} minTickGap={8} tick={{ fontSize: 11 }} />
+              <CartesianGrid
+                stroke={theme.palette.divider}
+                strokeDasharray={'3 3'}
+              />
+              <XAxis
+                dataKey={'label'}
+                minTickGap={8}
+                tick={{ fill: theme.palette.text.secondary, fontSize: 11 }}
+                axisLine={{ stroke: theme.palette.divider }}
+                tickLine={false}
+              />
               <YAxis
                 width={64}
-                tick={{ fontSize: 11 }}
+                tick={{ fill: theme.palette.text.secondary, fontSize: 11 }}
+                axisLine={{ stroke: theme.palette.divider }}
+                tickLine={false}
                 tickFormatter={(value: number) =>
                   new Intl.NumberFormat('ru-RU', {
                     notation: 'compact',
@@ -64,20 +76,25 @@ export function MonthlyDynamicsChart({ data, currency }: Props) {
                   zIndex: 1,
                 }}
                 contentStyle={{
+                  backgroundColor: theme.palette.background.paper,
+                  borderColor: theme.palette.divider,
+                  borderRadius: theme.shape.borderRadius,
+                  color: theme.palette.text.primary,
                   maxWidth: '100%',
                   whiteSpace: 'normal',
                   overflowWrap: 'anywhere',
                 }}
+                labelStyle={{ color: theme.palette.text.primary }}
                 formatter={(value, name) => [
                   formatDashboardAmount(String(value), currency),
                   String(name),
                 ]}
               />
-              <Legend />
+              <Legend wrapperStyle={{ color: theme.palette.text.secondary }} />
               <Line
                 name={'Доходы'}
                 dataKey={'income'}
-                stroke={theme.palette.primary.main}
+                stroke={theme.palette.success.main}
                 strokeWidth={2}
                 isAnimationActive={false}
               />

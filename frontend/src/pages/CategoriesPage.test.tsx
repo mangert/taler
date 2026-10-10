@@ -130,7 +130,7 @@ describe('CategoriesPage', () => {
         body: JSON.stringify({
           name: 'Транспорт',
           icon: 'category',
-          color: '#2E7D32',
+          color: '#9FB77A',
           type: 'EXPENSE',
         }),
       }),

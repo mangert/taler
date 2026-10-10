@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { trackBrowserErrors } from './support/browser-errors';
 
 const profile = {
   id: '10000000-0000-4000-8000-000000000001',
@@ -81,7 +82,8 @@ test.beforeEach(async ({ page }) => {
 
 test('keeps equal-height desktop cards and a single mobile column without horizontal overflow', async ({
   page,
-}, testInfo) => {
+}) => {
+  const assertNoBrowserErrors = trackBrowserErrors(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/budgets?month=2026-09-01');
   const cards = page.locator('article');
@@ -94,7 +96,7 @@ test('keeps equal-height desktop cards and a single mobile column without horizo
   ).toBeVisible();
   await expect(
     page.getByText(/100000000% от лимита — лимит превышен/),
-  ).toHaveCSS('color', /rgb\(211,\s*47,\s*47\)/);
+  ).toHaveCSS('color', /rgb\(232,\s*148,\s*125\)/);
   const progress = page.getByRole('progressbar', {
     name: 'Прогресс бюджета Путешествия и неожиданные покупки для дома',
   });
@@ -115,10 +117,6 @@ test('keeps equal-height desktop cards and a single mobile column without horizo
   expect(
     Math.abs((desktop[1]?.height ?? 0) - (desktop[2]?.height ?? 0)),
   ).toBeLessThan(1);
-  await page.screenshot({
-    path: testInfo.outputPath('desktop.png'),
-    fullPage: true,
-  });
 
   await page.setViewportSize({ width: 390, height: 844 });
   const mobile = await Promise.all(
@@ -131,8 +129,5 @@ test('keeps equal-height desktop cards and a single mobile column without horizo
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(390);
-  await page.screenshot({
-    path: testInfo.outputPath('mobile.png'),
-    fullPage: true,
-  });
+  assertNoBrowserErrors();
 });

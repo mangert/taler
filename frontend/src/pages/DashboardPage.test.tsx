@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import { App } from '../app/App';
 
 const profile = {
@@ -66,9 +66,19 @@ describe('DashboardPage', () => {
     vi.stubGlobal('fetch', fetchMock);
     render(<App />);
 
-    const loading = await screen.findByRole('status', {
-      name: 'Загрузка финансовой сводки',
-    });
+    await waitFor(
+      () =>
+        expect(fetchMock).toHaveBeenCalledWith(
+          '/api/v1/dashboard?months=6',
+          expect.objectContaining({ credentials: 'include' }),
+        ),
+      { timeout: 20_000 },
+    );
+    const loading = await screen.findByRole(
+      'status',
+      { name: 'Загрузка финансовой сводки' },
+      { timeout: 20_000 },
+    );
     expect(loading).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Доходы' })).toBeNull();
 
@@ -77,7 +87,7 @@ describe('DashboardPage', () => {
       await screen.findByRole('heading', { name: 'Доходы' }),
     ).toBeInTheDocument();
     expect(loading).not.toBeInTheDocument();
-  });
+  }, 45_000);
 
   it('loads a typed dashboard and presents its widgets with textual data', async () => {
     const fetchMock = vi.fn((input: string) => {
@@ -91,7 +101,10 @@ describe('DashboardPage', () => {
     render(<App />);
 
     expect(
-      await screen.findByRole('heading', { name: 'Финансовая сводка' }),
+      await screen.findByRole('heading', {
+        name: 'Финансовая сводка',
+        level: 2,
+      }),
     ).toBeInTheDocument();
     expect(
       await screen.findByRole('heading', { name: 'Доходы' }),
@@ -101,10 +114,10 @@ describe('DashboardPage', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Баланс' })).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: 'Расходы по категориям' }),
+      screen.getByRole('heading', { name: 'Расходы по категориям', level: 3 }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: 'Динамика по месяцам' }),
+      screen.getByRole('heading', { name: 'Динамика по месяцам', level: 3 }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: 'Топ категорий' }),

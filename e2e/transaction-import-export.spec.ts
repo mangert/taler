@@ -53,7 +53,7 @@ test('imports a fixture CSV and exports only the filtered rows', async ({
   page,
 }, testInfo) => {
   test.skip(
-    testInfo.project.name === 'mock-chromium' && !isolatedApiUrl,
+    testInfo.project.name.startsWith('mock-') && !isolatedApiUrl,
     'A real seeded API is required for the import/export journey',
   );
   const marker = `CSV-E2E-${randomUUID()}`;
@@ -105,9 +105,11 @@ test('imports a fixture CSV and exports only the filtered rows', async ({
       type: 'EXPENSE',
     });
     await page.goto(`/transactions?${filters.toString()}`);
-    const table = page.getByRole('table', { name: 'Транзакции' });
-    await expect(table.getByText(`${marker} Coffee`)).toBeVisible();
-    await expect(table.getByText(`${marker} Tea`)).toBeVisible();
+    const list = testInfo.project.name.endsWith('mobile')
+      ? page.getByRole('list', { name: 'Карточки транзакций' })
+      : page.getByRole('table', { name: 'Транзакции' });
+    await expect(list.getByText(`${marker} Coffee`)).toBeVisible();
+    await expect(list.getByText(`${marker} Tea`)).toBeVisible();
 
     const responsePromise = page.waitForResponse(
       (response) =>

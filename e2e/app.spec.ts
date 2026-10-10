@@ -48,7 +48,10 @@ test('cannot reopen a protected page after logout', async ({ page }) => {
     }),
   ).toBeVisible();
 
-  await page.getByRole('button', { name: 'Выйти' }).click();
+  await page
+    .getByRole('button', { name: `Меню пользователя: ${account.displayName}` })
+    .click();
+  await page.getByRole('menuitem', { name: 'Выйти' }).click();
 
   await expect(
     page.getByRole('heading', { name: 'Вход в Taler' }),

@@ -19,11 +19,12 @@ for (const viewport of [
   test(`creates, filters, edits and deletes a transaction on ${viewport.name}`, async ({
     page,
   }, testInfo) => {
+    test.skip(!testInfo.project.name.endsWith(viewport.name));
     await page.setViewportSize({
       width: viewport.width,
       height: viewport.height,
     });
-    const mockApi = testInfo.project.name === 'mock-chromium';
+    const mockApi = testInfo.project.name.startsWith('mock-');
     const description = `E2E transaction ${randomUUID()}`;
     let createdId: string | null = null;
     let deleted = false;
@@ -96,10 +97,19 @@ for (const viewport of [
       await expect(editForm).toHaveCount(0);
       await expect(list.getByText(/44,75/)).toBeVisible();
 
-      await page.goto('/audit-log?action=UPDATE&entityType=TRANSACTION');
+      await page.goto('/audit-log');
       await expect(
         page.getByRole('heading', { name: 'Журнал изменений' }),
       ).toBeVisible();
+      await page.getByRole('combobox', { name: 'Сущность' }).click();
+      await page.getByRole('option', { name: 'Транзакция' }).click();
+      await page.getByRole('combobox', { name: 'Действие' }).click();
+      await page.getByRole('option', { name: 'Изменение' }).click();
+      await expect(page).toHaveURL(
+        (url) =>
+          url.searchParams.get('entityType') === 'TRANSACTION' &&
+          url.searchParams.get('action') === 'UPDATE',
+      );
       const journalEntry =
         viewport.name === 'mobile'
           ? page
@@ -111,6 +121,26 @@ for (const viewport of [
               .getByRole('row')
               .filter({ hasText: description });
       await expect(journalEntry).toContainText('Изменение');
+      await journalEntry
+        .getByRole('button', { name: 'Подробнее об изменении' })
+        .click();
+      const auditDetails = page.getByRole('dialog', {
+        name: 'Детали изменения',
+      });
+      await expect(auditDetails).toBeVisible();
+      const amountChange = auditDetails
+        .getByRole('table', { name: 'Сравнение изменений' })
+        .getByRole('row')
+        .filter({
+          has: page.getByRole('rowheader', { name: 'Сумма Изменено' }),
+        });
+      await expect(amountChange.getByRole('cell').nth(0)).toHaveText(
+        /^23\.50(?:00)?$/,
+      );
+      await expect(amountChange.getByRole('cell').nth(1)).toHaveText(
+        /^44\.75(?:00)?$/,
+      );
+      await auditDetails.getByRole('button', { name: 'Закрыть' }).click();
 
       await page.goto(
         `/transactions?search=${encodeURIComponent(description)}`,
@@ -144,10 +174,17 @@ for (const viewport of [
       }
     } finally {
       if (createdId && !deleted && !mockApi) {
-        const response = await page.request.delete(
-          `/api/v1/transactions/${createdId}`,
+        const status = await page.evaluate(
+          async (id) =>
+            (
+              await fetch(`/api/v1/transactions/${id}`, {
+                method: 'DELETE',
+                credentials: 'include',
+              })
+            ).status,
+          createdId,
         );
-        expect([204, 404]).toContain(response.status());
+        expect([204, 404]).toContain(status);
       }
     }
   });

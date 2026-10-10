@@ -28,11 +28,14 @@ interface CategoryFormDialogProps {
   onSave(values: CategoryFormValues): Promise<void>;
 }
 
-function defaults(category: Category | null): CategoryFormValues {
+function defaults(
+  category: Category | null,
+  defaultColor: string,
+): CategoryFormValues {
   return {
     name: category?.name ?? '',
     icon: category?.icon ?? 'category',
-    color: category?.color ?? '#2E7D32',
+    color: category?.color ?? defaultColor,
     type: category?.type ?? 'EXPENSE',
   };
 }
@@ -54,7 +57,7 @@ export function CategoryFormDialog({
     formState: { errors, isSubmitting },
   } = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
-    defaultValues: defaults(category),
+    defaultValues: defaults(category, theme.palette.secondary.main),
   });
 
   const submit = handleSubmit(async (values) => {

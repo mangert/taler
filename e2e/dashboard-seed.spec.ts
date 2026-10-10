@@ -27,8 +27,9 @@ for (const scenario of [
   test(`renders the seeded dashboard on ${scenario.name} without overflow or console errors`, async ({
     page,
   }, testInfo) => {
+    test.skip(!testInfo.project.name.endsWith(scenario.name));
     test.skip(
-      testInfo.project.name === 'mock-chromium' && !isolatedApiUrl,
+      testInfo.project.name.startsWith('mock-') && !isolatedApiUrl,
       'Real seeded API is required for this scenario',
     );
     await page.setViewportSize({
@@ -106,9 +107,5 @@ for (const scenario of [
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBeLessThanOrEqual(scenario.width);
     expect(errors).toEqual([]);
-    await page.screenshot({
-      path: testInfo.outputPath(`seed-dashboard-${scenario.name}.png`),
-      fullPage: true,
-    });
   });
 }

@@ -30,7 +30,7 @@
     "test": "npm run test --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
     "e2e": "npm run test:e2e --workspace=backend \u0026\u0026 playwright test",
-    "e2e:ui": "npm run build --workspace=frontend \u0026\u0026 playwright test e2e/transactions.spec.ts --config=playwright.ui.config.ts",
+    "e2e:ui": "npm run build --workspace=frontend \u0026\u0026 playwright test e2e/categories-crud.spec.ts e2e/transactions.spec.ts e2e/budget-progress.spec.ts --config=playwright.ui.config.ts",
     "api:generate": "npm run api:generate --workspace=frontend",
     "api:check": "npm run api:check --workspace=frontend",
     "db:test:clean": "node --env-file-if-exists=.env --import tsx backend/test/database/clean-test-database.ts",

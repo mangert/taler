@@ -1,5 +1,6 @@
-import { Alert, Box, Button, CircularProgress, Stack } from '@mui/material';
+import { Box } from '@mui/material';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { ErrorState, LoadingState } from '../../shared/ui/PageStates';
 import { useAuth } from './auth-context';
 
 export function ProtectedRoute() {
@@ -10,25 +11,27 @@ export function ProtectedRoute() {
     return (
       <Box
         component="main"
+        id="main-content"
+        tabIndex={-1}
         sx={{ display: 'grid', minHeight: '100vh', placeItems: 'center' }}
       >
-        <Stack spacing={2} sx={{ alignItems: 'center' }}>
-          <CircularProgress />
-          <span>Проверяем сессию…</span>
-        </Stack>
+        <LoadingState message="Проверяем сессию…" />
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Box component="main" sx={{ mx: 'auto', p: 3, maxWidth: 560 }}>
-        <Alert
-          severity="error"
-          action={<Button onClick={() => void retry()}>Повторить</Button>}
-        >
-          Не удалось проверить сессию.
-        </Alert>
+      <Box
+        component="main"
+        id="main-content"
+        tabIndex={-1}
+        sx={{ mx: 'auto', p: 3, maxWidth: 560 }}
+      >
+        <ErrorState
+          message="Не удалось проверить сессию."
+          onRetry={() => void retry()}
+        />
       </Box>
     );
   }

@@ -4,7 +4,6 @@ import {
   Button,
   Container,
   Pagination,
-  Skeleton,
   Stack,
   Typography,
 } from '@mui/material';
@@ -25,6 +24,7 @@ import {
   type AuditEntry,
   type AuditListParams,
 } from '../shared/api/audit';
+import { EmptyState, ErrorState, PageSkeleton } from '../shared/ui/PageStates';
 
 const pageSize = 20;
 
@@ -91,21 +91,12 @@ export function AuditLogPage() {
           }
         />
         {auditQuery.isPending ? (
-          <Stack role="status" aria-label="Загрузка журнала" spacing={2}>
-            <Skeleton variant="rounded" height={80} />
-            <Skeleton variant="rounded" height={80} />
-          </Stack>
+          <PageSkeleton label="Загрузка журнала" heights={[80, 80]} />
         ) : auditQuery.isError ? (
-          <Alert
-            severity="error"
-            action={
-              <Button onClick={() => void auditQuery.refetch()}>
-                Повторить
-              </Button>
-            }
-          >
-            Не удалось загрузить журнал изменений.
-          </Alert>
+          <ErrorState
+            message="Не удалось загрузить журнал изменений."
+            onRetry={() => void auditQuery.refetch()}
+          />
         ) : auditQuery.data.items.length === 0 &&
           auditQuery.data.meta.total > 0 ? (
           <Alert
@@ -119,11 +110,13 @@ export function AuditLogPage() {
             На этой странице изменений больше нет.
           </Alert>
         ) : auditQuery.data.items.length === 0 ? (
-          <Alert severity="info">
-            {hasFilters
-              ? 'По вашим фильтрам изменений не найдено.'
-              : 'В журнале пока нет изменений.'}
-          </Alert>
+          <EmptyState
+            message={
+              hasFilters
+                ? 'По вашим фильтрам изменений не найдено.'
+                : 'В журнале пока нет изменений.'
+            }
+          />
         ) : (
           <Stack spacing={2}>
             <Box sx={{ display: { xs: 'none', md: 'block' } }}>

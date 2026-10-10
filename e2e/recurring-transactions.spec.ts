@@ -17,7 +17,8 @@ for (const viewport of [
 ] as const) {
   test(`creates and displays a recurring rule on ${viewport.name}`, async ({
     page,
-  }) => {
+  }, testInfo) => {
+    test.skip(!testInfo.project.name.endsWith(viewport.name));
     await page.setViewportSize(viewport);
     const description = `E2E recurring ${randomUUID()}`;
     const startDate = `${new Date().getUTCFullYear() + 2}-02-01`;

@@ -1,5 +1,6 @@
 import { Paper, Stack, Typography } from '@mui/material';
 import type { Dashboard } from '../../shared/api/dashboard';
+import { dashboardPanelSx } from './dashboard-layout';
 import {
   formatDashboardAmount,
   formatDashboardMonth,
@@ -18,9 +19,9 @@ export function DashboardTextSummary({ dashboard }: Props) {
     <Paper
       component={'section'}
       aria-label={'Текстовая сводка'}
-      sx={{ p: 2, minWidth: 0, overflowWrap: 'anywhere' }}
+      sx={{ ...dashboardPanelSx, overflowWrap: 'anywhere' }}
     >
-      <Typography component={'h2'} variant={'h6'} gutterBottom>
+      <Typography component={'h3'} variant={'h6'} gutterBottom>
         Текстовая сводка
       </Typography>
       {!hasActivity ? (
@@ -58,7 +59,7 @@ export function DashboardTextSummary({ dashboard }: Props) {
             </Typography>
           ) : null}
           {dashboard.expensesByCategory.length > 0 ? (
-            <Typography component={'h3'} variant={'subtitle1'}>
+            <Typography component={'h4'} variant={'subtitle1'}>
               Данные по категориям
             </Typography>
           ) : null}
@@ -78,7 +79,7 @@ export function DashboardTextSummary({ dashboard }: Props) {
             </Stack>
           ) : null}
           {dashboard.monthlySeries.length > 0 ? (
-            <Typography component={'h3'} variant={'subtitle1'}>
+            <Typography component={'h4'} variant={'subtitle1'}>
               Данные по месяцам
             </Typography>
           ) : null}

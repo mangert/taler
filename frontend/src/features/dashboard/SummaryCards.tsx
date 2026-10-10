@@ -1,5 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material';
 import type { Dashboard } from '../../shared/api/dashboard';
+import { dashboardPanelSx } from './dashboard-layout';
 import { formatDashboardAmount } from './dashboard-view-model';
 
 interface Props {
@@ -30,16 +31,19 @@ export function SummaryCards({ totals, currency }: Props) {
     >
       {(
         [
-          ['Доходы', totals.income],
-          ['Расходы', totals.expense],
-          ['Баланс', totals.balance],
+          { title: 'Доходы', amount: totals.income, color: 'success.main' },
+          { title: 'Расходы', amount: totals.expense, color: 'error.main' },
+          { title: 'Баланс', amount: totals.balance, color: 'primary.main' },
         ] as const
-      ).map(([title, amount]) => (
-        <Paper key={title} sx={{ p: 2, minWidth: 0, overflowWrap: 'anywhere' }}>
-          <Typography component={'h2'} variant={'h6'}>
+      ).map(({ title, amount, color }) => (
+        <Paper
+          key={title}
+          sx={{ ...dashboardPanelSx, overflowWrap: 'anywhere' }}
+        >
+          <Typography component={'h3'} variant={'h6'}>
             {title}
           </Typography>
-          <Typography variant={'h5'}>
+          <Typography variant={'h5'} sx={{ color }}>
             {formatDashboardAmount(amount, currency)}
           </Typography>
         </Paper>

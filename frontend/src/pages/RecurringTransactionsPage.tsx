@@ -3,7 +3,6 @@ import {
   Button,
   Container,
   Pagination,
-  Skeleton,
   Stack,
   Typography,
 } from '@mui/material';
@@ -22,6 +21,7 @@ import {
   type CreateRecurringRuleInput,
   type RecurringRule,
 } from '../shared/api/recurring-transactions';
+import { EmptyState, ErrorState, PageSkeleton } from '../shared/ui/PageStates';
 
 const pageSize = 20;
 
@@ -153,32 +153,20 @@ export function RecurringTransactionsPage() {
           </Alert>
         ) : null}
         {rulesQuery.isPending || categoriesQuery.isPending ? (
-          <Stack
-            role="status"
-            aria-label="Загрузка повторяющихся транзакций"
-            spacing={2}
-          >
-            <Skeleton variant="rounded" height={150} />
-            <Skeleton variant="rounded" height={150} />
-          </Stack>
+          <PageSkeleton
+            label="Загрузка повторяющихся транзакций"
+            heights={[150, 150]}
+          />
         ) : rulesQuery.isError || categoriesQuery.isError ? (
-          <Alert
-            severity="error"
-            action={
-              <Button
-                onClick={() => {
-                  void rulesQuery.refetch();
-                  void categoriesQuery.refetch();
-                }}
-              >
-                Повторить
-              </Button>
-            }
-          >
-            Не удалось загрузить повторяющиеся транзакции.
-          </Alert>
+          <ErrorState
+            message="Не удалось загрузить повторяющиеся транзакции."
+            onRetry={() => {
+              void rulesQuery.refetch();
+              void categoriesQuery.refetch();
+            }}
+          />
         ) : rulesQuery.data.items.length === 0 ? (
-          <Alert severity="info">Повторяющихся правил пока нет.</Alert>
+          <EmptyState message="Повторяющихся правил пока нет." />
         ) : (
           <>
             <RecurringRuleList

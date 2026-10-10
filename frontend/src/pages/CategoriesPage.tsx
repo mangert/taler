@@ -1,9 +1,7 @@
 import {
-  Alert,
   Button,
   Container,
   Pagination,
-  Skeleton,
   Stack,
   TextField,
   Typography,
@@ -20,6 +18,7 @@ import { invalidateCategoryDependents } from '../features/categories/invalidate-
 import type { CategoryFormValues } from '../features/categories/category-schema';
 import { categoriesApi } from '../shared/api/categories';
 import type { Category } from '../shared/api/categories';
+import { EmptyState, ErrorState, PageSkeleton } from '../shared/ui/PageStates';
 
 const pageSize = 20;
 
@@ -121,28 +120,20 @@ export function CategoriesPage() {
           fullWidth
         />
         {categoriesQuery.isPending ? (
-          <Stack role="status" aria-label="Загрузка категорий" spacing={2}>
-            <Skeleton variant="rounded" height={120} />
-            <Skeleton variant="rounded" height={120} />
-            <Skeleton variant="rounded" height={120} />
-          </Stack>
+          <PageSkeleton label="Загрузка категорий" heights={[120, 120, 120]} />
         ) : categoriesQuery.isError ? (
-          <Alert
-            severity="error"
-            action={
-              <Button onClick={() => void categoriesQuery.refetch()}>
-                Повторить
-              </Button>
-            }
-          >
-            Не удалось загрузить категории.
-          </Alert>
+          <ErrorState
+            message="Не удалось загрузить категории."
+            onRetry={() => void categoriesQuery.refetch()}
+          />
         ) : categoriesQuery.data.items.length === 0 ? (
-          <Alert severity="info">
-            {search
-              ? 'По вашему запросу категории не найдены.'
-              : 'У вас пока нет категорий.'}
-          </Alert>
+          <EmptyState
+            message={
+              search
+                ? 'По вашему запросу категории не найдены.'
+                : 'У вас пока нет категорий.'
+            }
+          />
         ) : (
           <>
             <CategoryGrid
