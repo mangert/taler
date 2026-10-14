@@ -1,6 +1,7 @@
 node_modules/
 dist/
 backend/generated/
+backend/src/generated/prisma/
 frontend/src/shared/api/schema.d.ts
 coverage/
 playwright-report/

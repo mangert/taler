@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DATABASE_URL: postgresql://taler_dev:local_dev_only@127.0.0.1:5432/taler_dev?schema=public
+  TEST_DATABASE_URL: postgresql://taler_test:local_test_only@127.0.0.1:5432/taler_test?schema=public
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run prisma:generate --workspace=backend
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: taler_dev
+          POSTGRES_USER: taler_dev
+          POSTGRES_PASSWORD: local_dev_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Create dedicated test database
+        run: docker exec -i ${{ job.services.postgres.id }} psql -v ON_ERROR_STOP=1 -U taler_dev -d taler_dev < docker/postgres/init/01-create-test-database.sql
+      - run: npm run prisma:generate --workspace=backend
+      - name: Deploy migrations to test database
+        run: npm run prisma:migrate:deploy --workspace=backend
+        env:
+          DATABASE_URL: ${{ env.TEST_DATABASE_URL }}
+      - name: Assert expected test suites exist
+        run: |
+          test $(find backend/src -type f -name '*.spec.ts' | wc -l) -ge 10
+          test $(find frontend/src -type f \( -name '*.test.ts' -o -name '*.test.tsx' \) | wc -l) -gt 0
+      - name: Run Jest and Vitest
+        run: npm run test
+      - name: Run backend Supertest suites
+        run: npm run test:e2e --workspace=backend
+      - name: Run database integration suites
+        run: npm run test:data
+
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run prisma:generate --workspace=backend
+      - run: npm run build
+
+  compose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - run: docker compose config
+      - run: docker compose build db-init backend frontend
+
+  e2e-smoke:
+    needs: [build, compose]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    env:
+      CI: 'true'
+      PLAYWRIGHT_HTML_OPEN: never
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run desktop and mobile Playwright smoke
+        run: npx playwright test e2e/app.spec.ts --reporter=list,html
+      - name: Publish Playwright diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-smoke-failure
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7

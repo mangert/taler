@@ -10,6 +10,16 @@ COPY frontend/package.json frontend/package.json
 
 RUN npm ci
 
+FROM node:24-alpine AS db-init-dependencies
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+COPY backend/package.json backend/package.json
+COPY frontend/package.json frontend/package.json
+
+RUN npm ci --workspace=backend --include-workspace-root=false
+
 FROM dependencies AS development
 
 ENV NODE_ENV=development
@@ -20,7 +30,7 @@ WORKDIR /app/backend
 
 CMD ["npm", "run", "start:dev"]
 
-FROM dependencies AS db-init
+FROM db-init-dependencies AS db-init
 
 COPY backend backend
 
