@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с транзакциями: транзакции карточками. */
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import {
@@ -23,6 +24,7 @@ interface TransactionCardListProps {
   onDelete(transaction: Transaction): void;
 }
 
+/** Отображает транзакции карточками. */
 export function TransactionCardList({
   transactions,
   categoryNames,

@@ -1,3 +1,4 @@
+/** Описывает ответ API с данными финансовой сводки. */
 import { ApiProperty } from '@nestjs/swagger';
 
 export class DashboardTotalsDto {

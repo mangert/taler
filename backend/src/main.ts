@@ -1,9 +1,11 @@
+/** Запускает и настраивает HTTP-сервер. */
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 import { configureApplication } from './common/bootstrap/configure-application.js';
 import { configureSwagger } from './common/swagger/configure-swagger.js';
 
+/** Запускает сервер приложения. */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);

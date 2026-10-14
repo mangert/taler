@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с повторяющимися операциями: таблицу повторяющихся операций. */
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import PauseCircleOutlinedIcon from '@mui/icons-material/PauseCircleOutlined';
@@ -30,6 +31,7 @@ interface RecurringRuleTableProps {
   togglingId: string | null;
 }
 
+/** Отображает таблицу повторяющихся операций. */
 export function RecurringRuleTable({
   rules,
   categoryNames,

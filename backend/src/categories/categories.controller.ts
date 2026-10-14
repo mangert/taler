@@ -1,3 +1,4 @@
+/** Обрабатывает HTTP-запросы для работы с категориями. */
 import {
   Body,
   Controller,
@@ -46,8 +47,10 @@ import { UpdateCategoryDto } from './dto/update-category.dto.js';
 @UseGuards(JwtAuthGuard)
 @Controller('categories')
 export class CategoriesController {
+  /** Получает зависимости для работы класса. */
   constructor(private readonly categories: CategoriesService) {}
 
+  /** Возвращает список категорий. */
   @Get()
   @ApiOperation({
     summary: 'List current user categories with optional name search',
@@ -64,6 +67,7 @@ export class CategoriesController {
     return this.categories.list(user.id, query);
   }
 
+  /** Создаёт категорию. */
   @Post()
   @ApiOperation({ summary: 'Create a category for the current user' })
   @ApiCreatedResponse({ type: CategoryResponseDto })
@@ -82,6 +86,7 @@ export class CategoriesController {
     return this.categories.create(user.id, body);
   }
 
+  /** Возвращает категорию. */
   @Get(':id')
   @ApiOperation({ summary: 'Get an owned category' })
   @ApiOkResponse({ type: CategoryResponseDto })
@@ -96,6 +101,7 @@ export class CategoriesController {
     return this.categories.get(user.id, id);
   }
 
+  /** Обновляет категорию. */
   @Patch(':id')
   @ApiOperation({ summary: 'Update an owned category' })
   @ApiOkResponse({ type: CategoryResponseDto })
@@ -119,6 +125,7 @@ export class CategoriesController {
     return this.categories.update(user.id, id, body);
   }
 
+  /** Удаляет категорию. */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete an unused owned category' })

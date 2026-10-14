@@ -1,3 +1,4 @@
+/** Выбирает и формирует публичные данные профиля. */
 import { Prisma } from '../generated/prisma/client.js';
 import { serializeIsoDateTime } from '../common/helpers/serialization.js';
 import { UserResponseDto } from './dto/user-response.dto.js';
@@ -16,6 +17,7 @@ export type UserProfileRecord = Prisma.UserGetPayload<{
   select: typeof userProfileSelect;
 }>;
 
+/** Формирует публичные данные профиля. */
 export function toUserResponse(user: UserProfileRecord): UserResponseDto {
   return {
     id: user.id,

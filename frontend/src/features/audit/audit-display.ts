@@ -1,3 +1,4 @@
+/** Форматирует записи и изменения журнала аудита. */
 import type {
   AuditAction,
   AuditEntry,
@@ -38,6 +39,7 @@ export interface AuditFieldChange {
   changed: boolean;
 }
 
+/** Форматирует значение поля аудита. */
 function displayValue(value: unknown): string {
   if (value === null || value === undefined || value === '') return '—';
   if (typeof value === 'string') return value;
@@ -46,6 +48,7 @@ function displayValue(value: unknown): string {
   return 'Сложное значение';
 }
 
+/** Собирает список изменённых полей. */
 export function auditChanges(entry: AuditEntry): AuditFieldChange[] {
   const before = entry.before ?? {};
   const after = entry.after ?? {};
@@ -69,6 +72,7 @@ export function auditChanges(entry: AuditEntry): AuditFieldChange[] {
   }));
 }
 
+/** Формирует краткое описание события аудита. */
 export function auditSummary(entry: AuditEntry): string {
   const snapshot = entry.after ?? entry.before;
   if (typeof snapshot?.description === 'string' && snapshot.description.trim())
@@ -77,6 +81,7 @@ export function auditSummary(entry: AuditEntry): string {
   return entityLabels[entry.entityType];
 }
 
+/** Форматирует время события аудита. */
 export function formatAuditTimestamp(
   timestamp: string,
   timeZone: string,

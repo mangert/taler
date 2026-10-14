@@ -1,3 +1,4 @@
+/** Описывает поля создания бюджета для API. */
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, IsUUID, Matches } from 'class-validator';
 

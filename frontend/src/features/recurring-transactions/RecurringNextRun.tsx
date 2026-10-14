@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с повторяющимися операциями: дату следующего выполнения правила. */
 import { Stack, Typography } from '@mui/material';
 
 interface RecurringNextRunProps {
@@ -7,6 +8,7 @@ interface RecurringNextRunProps {
   compact?: boolean;
 }
 
+/** Отображает дату следующего выполнения правила. */
 export function RecurringNextRun({
   nextRunAt,
   timeZone,

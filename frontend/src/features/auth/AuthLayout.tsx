@@ -1,7 +1,9 @@
+/** Содержит компонент для работы с аутентификацией: каркас страниц входа и регистрации. */
 import { AccountBalanceWallet } from '@mui/icons-material';
 import { Box, Container, Paper, Stack, Typography } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 
+/** Отображает каркас страниц входа и регистрации. */
 export function AuthLayout() {
   return (
     <Box

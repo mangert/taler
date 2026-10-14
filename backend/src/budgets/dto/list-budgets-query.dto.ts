@@ -1,8 +1,10 @@
+/** Описывает параметры списка бюджетов для API. */
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, Matches, Max, Min, ValidateIf } from 'class-validator';
 import { budgetMonthPattern } from './create-budget.dto.js';
 
+/** Проверяет, что значение передано. */
 const provided = (_object: object, value: unknown): boolean =>
   value !== undefined;
 

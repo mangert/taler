@@ -1,3 +1,4 @@
+/** Связывает зависимости для работы с подключением к базе данных. */
 import { Module } from '@nestjs/common';
 import { PrismaService } from './prisma.service.js';
 

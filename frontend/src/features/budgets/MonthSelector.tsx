@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с бюджетами: выбор бюджетного месяца. */
 import { Button, Stack, Typography } from '@mui/material';
 import { budgetMonthLabel, shiftBudgetMonth } from './budget-month';
 
@@ -6,6 +7,7 @@ interface MonthSelectorProps {
   onChange(month: string): void;
 }
 
+/** Отображает выбор бюджетного месяца. */
 export function MonthSelector({ month, onChange }: MonthSelectorProps) {
   return (
     <Stack direction={'row'} spacing={1} sx={{ alignItems: 'center' }}>

@@ -1,3 +1,4 @@
+/** Описывает параметры списка транзакций для API. */
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type, type TransformFnParams } from 'class-transformer';
 import {
@@ -14,6 +15,7 @@ import {
 import { TransactionType } from '../../generated/prisma/client.js';
 import { amountPattern, datePattern } from './transaction-fields.dto.js';
 
+/** Проверяет, что значение передано. */
 const provided = (_object: object, value: unknown): boolean =>
   value !== undefined;
 

@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с профилем пользователя: форму профиля. */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Button, Paper, Stack, TextField } from '@mui/material';
 import { useState } from 'react';
@@ -8,6 +9,7 @@ import { applyServerFieldErrors } from '../../shared/lib/server-field-errors';
 import { FormAlert } from '../../shared/ui/FormAlert';
 import { profileSchema, type ProfileFormValues } from './profile-schema';
 
+/** Отображает форму профиля. */
 export function ProfileForm() {
   const { user, updateProfile } = useAuth();
   const [formError, setFormError] = useState<string | null>(null);

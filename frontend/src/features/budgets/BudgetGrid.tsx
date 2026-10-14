@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с бюджетами: сетку бюджетов. */
 import { Box } from '@mui/material';
 import type { Budget } from '../../shared/api/budgets';
 import { BudgetCard } from './BudgetCard';
@@ -9,6 +10,7 @@ interface BudgetGridProps {
   onDelete(budget: Budget): void;
 }
 
+/** Отображает сетку бюджетов. */
 export function BudgetGrid({
   budgets,
   categoryNames,

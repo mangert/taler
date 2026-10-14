@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с транзакциями: кнопку экспорта транзакций. */
 import { Alert, Button, Stack } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
 import {
@@ -9,6 +10,7 @@ interface ExportTransactionsButtonProps {
   filters: TransactionFilterParams;
 }
 
+/** Отображает кнопку экспорта транзакций. */
 export function ExportTransactionsButton({
   filters,
 }: ExportTransactionsButtonProps) {

@@ -1,11 +1,14 @@
+/** Содержит общий HTTP-клиент и обработку ошибок API. */
 import type { components } from './schema';
 
 export type ApiErrorResponse = components['schemas']['ApiErrorResponseDto'];
 
+/** Проверяет, что значение является объектом. */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
+/** Проверяет формат ошибки API. */
 function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
   return (
     isRecord(value) &&
@@ -21,6 +24,7 @@ export class ApiError extends Error {
   readonly code: string;
   readonly details: unknown[];
 
+  /** Создаёт объект ошибки API. */
   constructor(response: ApiErrorResponse) {
     super(response.message);
     this.name = 'ApiError';
@@ -30,6 +34,7 @@ export class ApiError extends Error {
   }
 }
 
+/** Отправляет запрос к API и разбирает ответ. */
 export async function apiRequest<T>(
   path: string,
   init: RequestInit = {},
@@ -67,6 +72,7 @@ export async function apiRequest<T>(
   return body as T;
 }
 
+/** Загружает двоичный ответ API. */
 export async function apiRequestBlob(path: string): Promise<Blob> {
   const response = await fetch(path, { credentials: 'include' });
   if (!response.ok) {

@@ -1,3 +1,4 @@
+/** Описывает параметры списка категорий для API. */
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type, type TransformFnParams } from 'class-transformer';
 import {
@@ -9,6 +10,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 
+/** Проверяет, что поле передано в запросе. */
 const isProvided = (_object: object, value: unknown): boolean =>
   value !== undefined;
 

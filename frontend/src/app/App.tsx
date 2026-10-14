@@ -1,8 +1,10 @@
+/** Подключает маршрутизатор приложения. */
 import { BrowserRouter } from 'react-router-dom';
 import { SkipLink } from '../shared/ui/SkipLink';
 import { AppProviders } from './AppProviders';
 import { AppRouter } from './AppRouter';
 
+/** Отображает приложение. */
 export function App() {
   return (
     <AppProviders>

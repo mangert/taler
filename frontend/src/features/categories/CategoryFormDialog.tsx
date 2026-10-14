@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с категориями: форму категории. */
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
@@ -28,6 +29,7 @@ interface CategoryFormDialogProps {
   onSave(values: CategoryFormValues): Promise<void>;
 }
 
+/** Формирует начальные значения формы. */
 function defaults(
   category: Category | null,
   defaultColor: string,
@@ -40,6 +42,7 @@ function defaults(
   };
 }
 
+/** Отображает форму категории. */
 export function CategoryFormDialog({
   open,
   category,

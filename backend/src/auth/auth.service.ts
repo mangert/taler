@@ -1,3 +1,4 @@
+/** Реализует операции с аутентификацией. */
 import {
   ConflictException,
   Injectable,
@@ -16,6 +17,7 @@ interface AuthResult {
   user: UserResponseDto;
 }
 
+/** Распознаёт ошибку уникальности базы данных. */
 function isUniqueConstraintError(error: unknown): boolean {
   return (
     typeof error === 'object' &&
@@ -25,6 +27,7 @@ function isUniqueConstraintError(error: unknown): boolean {
   );
 }
 
+/** Создаёт ответ о занятом адресе почты. */
 function emailConflict(): ConflictException {
   return new ConflictException({
     code: 'EMAIL_ALREADY_EXISTS',
@@ -32,6 +35,7 @@ function emailConflict(): ConflictException {
   });
 }
 
+/** Создаёт ответ о неверных учётных данных. */
 function invalidCredentials(): UnauthorizedException {
   return new UnauthorizedException({
     code: 'INVALID_CREDENTIALS',
@@ -41,11 +45,13 @@ function invalidCredentials(): UnauthorizedException {
 
 @Injectable()
 export class AuthService {
+  /** Получает зависимости для работы класса. */
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
 
+  /** Регистрирует нового пользователя. */
   async register(dto: RegisterDto): Promise<AuthResult> {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -81,6 +87,7 @@ export class AuthService {
     }
   }
 
+  /** Создаёт сессию пользователя. */
   async login(dto: LoginDto): Promise<AuthResult> {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -100,6 +107,7 @@ export class AuthService {
     };
   }
 
+  /** Возвращает профиль текущего пользователя. */
   async getCurrentUser(userId: string): Promise<UserResponseDto> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -116,6 +124,7 @@ export class AuthService {
     return toUserResponse(user);
   }
 
+  /** Подписывает токен доступа пользователя. */
   private createAccessToken(userId: string, email: string): Promise<string> {
     return this.jwtService.signAsync({ sub: userId, email });
   }

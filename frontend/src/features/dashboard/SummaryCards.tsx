@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с финансовой сводкой: карточки ключевых показателей. */
 import { Box, Paper, Typography } from '@mui/material';
 import type { Dashboard } from '../../shared/api/dashboard';
 import { dashboardPanelSx } from './dashboard-layout';
@@ -8,6 +9,7 @@ interface Props {
   currency: string;
 }
 
+/** Отображает карточки ключевых показателей. */
 export function SummaryCards({ totals, currency }: Props) {
   if (
     totals.income === '0.0000' &&

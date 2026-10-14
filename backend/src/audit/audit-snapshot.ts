@@ -1,5 +1,7 @@
+/** Формирует снимки сущностей для журнала аудита. */
 import type { Budget, Transaction } from '../generated/prisma/client.js';
 
+/** Создаёт снимок транзакции для аудита. */
 export function transactionAuditSnapshot(record: Transaction) {
   return {
     id: record.id,
@@ -14,6 +16,7 @@ export function transactionAuditSnapshot(record: Transaction) {
   };
 }
 
+/** Создаёт снимок бюджета для аудита. */
 export function budgetAuditSnapshot(record: Budget) {
   return {
     id: record.id,

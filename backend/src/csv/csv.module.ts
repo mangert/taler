@@ -1,3 +1,4 @@
+/** Связывает зависимости для работы с импортом и экспортом CSV. */
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';

@@ -1,3 +1,4 @@
+/** Связывает зависимости для работы с повторяющимися операциями. */
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuditModule } from '../audit/audit.module.js';

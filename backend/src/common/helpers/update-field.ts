@@ -1,6 +1,8 @@
+/** Различает переданные и пропущенные поля обновления. */
 export type UpdateFieldState<T> =
   { isProvided: false } | { isProvided: true; value: T };
 
+/** Определяет состояние поля при частичном обновлении. */
 export function getUpdateFieldState<
   TDto extends object,
   TKey extends keyof TDto,

@@ -1,3 +1,4 @@
+/** Проверяет данные форм для работы с категориями. */
 import { z } from 'zod';
 
 export const categorySchema = z.object({

@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с категориями: подтверждение удаления категории. */
 import type { Category } from '../../shared/api/categories';
 import { ApiError } from '../../shared/api/http';
 import { ConfirmDialog } from '../../shared/ui/ConfirmDialog';
@@ -8,6 +9,7 @@ interface DeleteCategoryDialogProps {
   onConfirm(category: Category): Promise<void>;
 }
 
+/** Отображает подтверждение удаления категории. */
 export function DeleteCategoryDialog({
   category,
   onClose,

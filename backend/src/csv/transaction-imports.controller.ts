@@ -1,3 +1,4 @@
+/** Обрабатывает HTTP-запросы для работы с импортом и экспортом CSV. */
 import {
   Body,
   Controller,
@@ -30,8 +31,10 @@ import { ImportResultDto, ImportUploadDto } from './dto/import-upload.dto.js';
 @UseGuards(JwtAuthGuard)
 @Controller('transaction-imports')
 export class TransactionImportsController {
+  /** Получает зависимости для работы класса. */
   constructor(private readonly csv: CsvService) {}
 
+  /** Импортирует транзакции из CSV. */
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Atomically import mapped UTF-8 CSV transactions' })

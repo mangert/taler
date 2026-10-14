@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с повторяющимися операциями: карточку повторяющейся операции. */
 import {
   Button,
   Card,
@@ -22,6 +23,7 @@ interface RecurringRuleCardProps {
   isToggling: boolean;
 }
 
+/** Отображает карточку повторяющейся операции. */
 export function RecurringRuleCard({
   rule,
   categoryName,

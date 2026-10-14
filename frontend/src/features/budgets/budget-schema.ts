@@ -1,3 +1,4 @@
+/** Проверяет данные форм для работы с бюджетами. */
 import { z } from 'zod';
 
 export const budgetSchema = z.object({

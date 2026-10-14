@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с транзакциями: фильтры транзакций. */
 import CloseIcon from '@mui/icons-material/Close';
 import TuneIcon from '@mui/icons-material/Tune';
 import {
@@ -29,6 +30,7 @@ interface TransactionsFilterBarProps {
   onReset(): void;
 }
 
+/** Отображает фильтры транзакций. */
 export function TransactionsFilterBar({
   filters,
   categories,

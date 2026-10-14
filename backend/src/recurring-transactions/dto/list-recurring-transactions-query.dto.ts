@@ -1,7 +1,9 @@
+/** Описывает параметры списка повторяющихся операций для API. */
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, Max, Min, ValidateIf } from 'class-validator';
 
+/** Проверяет, что значение передано. */
 const provided = (_object: object, value: unknown): boolean =>
   value !== undefined;
 

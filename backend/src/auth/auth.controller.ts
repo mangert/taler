@@ -1,3 +1,4 @@
+/** Обрабатывает HTTP-запросы для работы с аутентификацией. */
 import {
   Body,
   Controller,
@@ -33,11 +34,13 @@ import { JwtAuthGuard } from './jwt-auth.guard.js';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
+  /** Получает зависимости для работы класса. */
   constructor(
     private readonly authService: AuthService,
     private readonly authCookieService: AuthCookieService,
   ) {}
 
+  /** Регистрирует нового пользователя. */
   @Post('register')
   @ApiOperation({ summary: 'Register a user and start a session' })
   @ApiCreatedResponse({
@@ -63,6 +66,7 @@ export class AuthController {
     return result.user;
   }
 
+  /** Создаёт сессию пользователя. */
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Log in and start a session' })
@@ -89,6 +93,7 @@ export class AuthController {
     return result.user;
   }
 
+  /** Завершает сессию пользователя. */
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @ApiCookieAuth('cookieAuth')
@@ -103,6 +108,7 @@ export class AuthController {
     this.authCookieService.clear(response);
   }
 
+  /** Возвращает профиль текущего пользователя. */
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiCookieAuth('cookieAuth')

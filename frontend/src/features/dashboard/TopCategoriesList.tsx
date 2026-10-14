@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с финансовой сводкой: ведущие категории расходов. */
 import { Box, List, ListItem, Paper, Typography } from '@mui/material';
 import { dashboardPanelSx } from './dashboard-layout';
 import type { CategoryChartPoint } from './dashboard-view-model';
@@ -8,6 +9,7 @@ interface Props {
   currency: string;
 }
 
+/** Отображает ведущие категории расходов. */
 export function TopCategoriesList({ data, currency }: Props) {
   return (
     <Paper

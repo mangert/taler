@@ -1,3 +1,4 @@
+/** Подбирает соответствие столбцов CSV полям транзакции. */
 import { z } from 'zod';
 
 export const mappingFields = [
@@ -47,10 +48,12 @@ export const columnMappingSchema = z
 
 export type ColumnMapping = z.infer<typeof columnMappingSchema>;
 
+/** Нормализует заголовок столбца CSV. */
 function normalized(value: string): string {
   return value.toLocaleLowerCase().replace(/[\s_-]/g, '');
 }
 
+/** Предлагает соответствие столбцов CSV полям транзакции. */
 export function suggestColumnMapping(headers: string[]): ColumnMapping {
   const mapping: ColumnMapping = {
     date: '',

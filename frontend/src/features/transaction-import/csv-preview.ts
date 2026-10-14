@@ -1,3 +1,4 @@
+/** Читает образец CSV-файла перед импортом. */
 import Papa from 'papaparse';
 
 export interface CsvSample {
@@ -5,6 +6,7 @@ export interface CsvSample {
   rows: string[][];
 }
 
+/** Читает образец строк из CSV-файла. */
 export function readCsvSample(file: File): Promise<CsvSample> {
   return new Promise((resolve, reject) => {
     Papa.parse<string[]>(file, {

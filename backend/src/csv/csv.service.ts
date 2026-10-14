@@ -1,3 +1,4 @@
+/** Реализует операции с импортом и экспортом CSV. */
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { parse } from 'csv-parse/sync';
@@ -57,6 +58,7 @@ export interface UploadedCsvFile {
   buffer: Buffer;
 }
 
+/** Создаёт ответ об ошибке входных данных CSV. */
 function badRequest(
   code: string,
   message: string,
@@ -65,6 +67,7 @@ function badRequest(
   throw new BadRequestException({ code, message, details });
 }
 
+/** Проверяет сопоставление столбцов CSV. */
 function parseMapping(value: string): ColumnMapping {
   let decoded: unknown;
   try {
@@ -101,6 +104,7 @@ function parseMapping(value: string): ColumnMapping {
   return mapping;
 }
 
+/** Разбирает календарную дату из CSV. */
 function parseCalendarDate(value: string): Date | null {
   if (!datePattern.test(value)) return null;
   const date = new Date(`${value}T00:00:00.000Z`);
@@ -110,6 +114,7 @@ function parseCalendarDate(value: string): Date | null {
     : date;
 }
 
+/** Экранирует значение ячейки CSV. */
 function csvCell(value: string): string {
   const safe = /^\s*[=+\-@]/u.test(value) ? `'${value}` : value;
   return `"${safe.replaceAll('"', '""')}"`;
@@ -117,12 +122,14 @@ function csvCell(value: string): string {
 
 @Injectable()
 export class CsvService {
+  /** Получает зависимости для работы класса. */
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly config: ConfigService,
   ) {}
 
+  /** Импортирует транзакции из CSV. */
   async import(
     userId: string,
     mappingJson: string,
@@ -219,11 +226,13 @@ export class CsvService {
         });
         continue;
       }
+      /** Возвращает значение поля из входных данных. */
       const value = (field: MappingField): string => {
         const header = mapping[field];
         return header ? entry.record[headers.indexOf(header)].trim() : '';
       };
       const firstError = errors.length;
+      /** Добавляет ошибку строки в результат импорта. */
       const addError = (
         field: MappingField,
         code: string,
@@ -337,6 +346,7 @@ export class CsvService {
     return { importedCount: prepared.length };
   }
 
+  /** Формирует CSV из списка транзакций. */
   exportRows(
     userId: string,
     query: ExportTransactionsQueryDto,

@@ -1,3 +1,4 @@
+/** Описывает ответ API с данными пагинации. */
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ApiErrorResponseDto {

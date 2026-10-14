@@ -1,3 +1,4 @@
+/** Защищает маршруты проверкой JWT. */
 import {
   CanActivate,
   ExecutionContext,
@@ -14,6 +15,7 @@ export type AuthenticatedRequest = Omit<Request, 'cookies'> & {
   user?: AuthenticatedUser;
 };
 
+/** Проверяет данные токена доступа. */
 function isAccessTokenPayload(value: unknown): value is JwtAccessTokenPayload {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -24,6 +26,7 @@ function isAccessTokenPayload(value: unknown): value is JwtAccessTokenPayload {
   return typeof payload.sub === 'string' && typeof payload.email === 'string';
 }
 
+/** Создаёт ответ о недействительной сессии. */
 function invalidSession(): UnauthorizedException {
   return new UnauthorizedException({
     code: 'INVALID_SESSION',
@@ -33,8 +36,10 @@ function invalidSession(): UnauthorizedException {
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
+  /** Получает зависимости для работы класса. */
   constructor(private readonly jwtService: JwtService) {}
 
+  /** Проверяет право доступа по JWT. */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const accessToken = request.cookies[ACCESS_TOKEN_COOKIE];

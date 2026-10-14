@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с журналом аудита: подробности записи аудита. */
 import {
   Alert,
   Box,
@@ -36,6 +37,7 @@ interface AuditDetailsDialogProps {
   onClose(): void;
 }
 
+/** Отображает подробности записи аудита. */
 export function AuditDetailsDialog({
   entry,
   userId,

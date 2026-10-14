@@ -1,3 +1,4 @@
+/** Описывает параметры экспорта транзакции. */
 import { OmitType } from '@nestjs/swagger';
 import { ListTransactionsQueryDto } from './list-transactions-query.dto.js';
 

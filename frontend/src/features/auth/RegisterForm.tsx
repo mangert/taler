@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с аутентификацией: форму регистрации. */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
@@ -10,6 +11,7 @@ import { PasswordField } from '../../shared/ui/PasswordField';
 import { registerSchema, type RegisterFormValues } from './auth-schemas';
 import { useAuth } from './auth-context';
 
+/** Отображает форму регистрации. */
 export function RegisterForm() {
   const { register: registerUser } = useAuth();
   const navigate = useNavigate();

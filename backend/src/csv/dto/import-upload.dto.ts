@@ -1,3 +1,4 @@
+/** Описывает данные импорта CSV для API. */
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, IsJSON } from 'class-validator';
 

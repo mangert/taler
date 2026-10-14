@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с финансовой сводкой: график динамики по месяцам. */
 import { Box, Paper, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -21,6 +22,7 @@ interface Props {
   currency: string;
 }
 
+/** Отображает график динамики по месяцам. */
 export function MonthlyDynamicsChart({ data, currency }: Props) {
   const theme = useTheme();
   return (

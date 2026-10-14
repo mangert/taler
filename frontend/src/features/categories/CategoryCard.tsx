@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с категориями: карточку категории. */
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
@@ -47,6 +48,7 @@ const categoryIcons = {
   theater_comedy: TheaterComedyOutlinedIcon,
 };
 
+/** Отображает карточку категории. */
 export function CategoryCard({
   category,
   onEdit,

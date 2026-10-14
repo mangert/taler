@@ -1,3 +1,4 @@
+/** Задаёт размещение блоков финансовой сводки. */
 export const dashboardPanelSx = {
   p: { xs: 2, sm: 3 },
   minWidth: 0,

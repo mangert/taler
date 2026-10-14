@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с аутентификацией: контекст текущей сессии. */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { authApi, type UserProfile } from '../../shared/api/auth';
@@ -8,6 +9,7 @@ import {
   type AuthContextValue,
 } from './auth-context';
 
+/** Распознаёт ключ запроса текущей сессии. */
 function isAuthQueryKey(queryKey: readonly unknown[]): boolean {
   return (
     queryKey.length === authQueryKey.length &&
@@ -15,6 +17,7 @@ function isAuthQueryKey(queryKey: readonly unknown[]): boolean {
   );
 }
 
+/** Предоставляет контекст текущей сессии. */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const sessionQuery = useQuery({
@@ -32,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  /** Обновляет пользователя в кеше запросов. */
   const setUser = (user: UserProfile): UserProfile => {
     queryClient.setQueryData(authQueryKey, user);
     return user;

@@ -1,3 +1,4 @@
+/** Обрабатывает HTTP-запросы для работы с профилями пользователей. */
 import { Body, Controller, Patch, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -21,8 +22,10 @@ import { UsersService } from './users.service.js';
 @UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
+  /** Получает зависимости для работы класса. */
   constructor(private readonly usersService: UsersService) {}
 
+  /** Обновляет профиль текущего пользователя. */
   @Patch('me')
   @ApiOperation({ summary: 'Update the current user profile' })
   @ApiOkResponse({

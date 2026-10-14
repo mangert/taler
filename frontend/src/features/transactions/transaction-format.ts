@@ -1,3 +1,4 @@
+/** Форматирует данные для работы с транзакциями. */
 import type { TransactionType } from '../../shared/api/transactions';
 
 const locale = 'ru-RU';
@@ -8,11 +9,13 @@ const calendarDateFormatter = new Intl.DateTimeFormat(locale, {
   timeZone: 'UTC',
 });
 
+/** Форматирует дату транзакции. */
 export function formatTransactionDate(date: string): string {
   // transactionDate is a calendar date, not a timestamp in the browser's zone.
   return calendarDateFormatter.format(new Date(`${date}T00:00:00.000Z`));
 }
 
+/** Форматирует сумму транзакции. */
 export function formatTransactionAmount(
   amount: string,
   currency: string,

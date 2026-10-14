@@ -1,3 +1,4 @@
+/** Описывает поля создания повторяющейся операции для API. */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, type TransformFnParams } from 'class-transformer';
 import {

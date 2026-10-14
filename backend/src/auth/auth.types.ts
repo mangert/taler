@@ -1,3 +1,4 @@
+/** Описывает типы данных аутентифицированного пользователя. */
 export interface AuthenticatedUser {
   id: string;
   email: string;

@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с импортом транзакций: шаг выбора CSV-файла. */
 import { Alert, Box, Button, Stack, Typography } from '@mui/material';
 import { useId, useRef } from 'react';
 
@@ -9,6 +10,7 @@ interface CsvFileStepProps {
   onContinue?: () => void;
 }
 
+/** Отображает шаг выбора CSV-файла. */
 export function CsvFileStep({
   file,
   pending,
@@ -20,6 +22,7 @@ export function CsvFileStep({
   const descriptionId = useId();
   const errorId = useId();
   const describedBy = error ? `${descriptionId} ${errorId}` : descriptionId;
+  /** Открывает выбор CSV-файла. */
   const openFilePicker = () => {
     if (!pending) fileInputRef.current?.click();
   };

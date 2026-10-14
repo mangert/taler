@@ -1,3 +1,4 @@
+/** Реализует операции с повторяющимися операциями. */
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import {
@@ -15,17 +16,20 @@ export class RecurringSchedulerService implements OnApplicationBootstrap {
   private readonly logger = new Logger(RecurringSchedulerService.name);
   private running = false;
 
+  /** Получает зависимости для работы класса. */
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
   ) {}
 
+  /** Запускает обработку просроченных операций при старте. */
   onApplicationBootstrap(): void {
     void this.runDue(new Date()).catch((error: unknown) =>
       this.logFailure(error),
     );
   }
 
+  /** Запускает плановую обработку повторяющихся операций. */
   @Cron(CronExpression.EVERY_MINUTE)
   onCron(): void {
     void this.runDue(new Date()).catch((error: unknown) =>
@@ -33,6 +37,7 @@ export class RecurringSchedulerService implements OnApplicationBootstrap {
     );
   }
 
+  /** Обрабатывает наступившие повторяющиеся операции. */
   async runDue(now: Date): Promise<void> {
     if (this.running) return;
     this.running = true;
@@ -59,6 +64,7 @@ export class RecurringSchedulerService implements OnApplicationBootstrap {
     }
   }
 
+  /** Создаёт транзакцию для наступившего повторения. */
   private async processOccurrence(
     id: string,
     expectedNextRunAt: Date,
@@ -130,6 +136,7 @@ export class RecurringSchedulerService implements OnApplicationBootstrap {
     }
   }
 
+  /** Переносит правило после уже созданной транзакции. */
   private async advanceExistingOccurrence(
     id: string,
     expectedNextRunAt: Date,
@@ -168,6 +175,7 @@ export class RecurringSchedulerService implements OnApplicationBootstrap {
     return result.count === 1;
   }
 
+  /** Записывает ошибку обработки правила. */
   private logFailure(error: unknown): void {
     this.logger.error(
       'Recurring transaction catch-up failed',

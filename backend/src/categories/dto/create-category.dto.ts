@@ -1,3 +1,4 @@
+/** Описывает поля создания категории для API. */
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, type TransformFnParams } from 'class-transformer';
 import { IsDefined, IsEnum, IsString, Length, Matches } from 'class-validator';

@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с финансовой сводкой: круговую диаграмму расходов. */
 import { Box, List, ListItem, Paper, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
@@ -12,6 +13,7 @@ interface Props {
   currency: string;
 }
 
+/** Отображает круговую диаграмму расходов. */
 export function ExpensesPieChart({ data, currency }: Props) {
   const theme = useTheme();
   return (

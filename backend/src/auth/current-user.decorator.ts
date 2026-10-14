@@ -1,3 +1,4 @@
+/** Извлекает текущего пользователя из HTTP-запроса. */
 import {
   createParamDecorator,
   ExecutionContext,

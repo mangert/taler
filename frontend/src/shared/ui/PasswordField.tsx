@@ -1,3 +1,4 @@
+/** Содержит общий UI-компонент: поле ввода пароля. */
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import {
   IconButton,
@@ -9,6 +10,7 @@ import { useState } from 'react';
 
 type PasswordFieldProps = Omit<TextFieldProps, 'slotProps' | 'type'>;
 
+/** Отображает поле ввода пароля. */
 export function PasswordField(props: PasswordFieldProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const visibilityLabel = isPasswordVisible

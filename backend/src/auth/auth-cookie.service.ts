@@ -1,3 +1,4 @@
+/** Реализует операции с аутентификацией. */
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { CookieOptions, Response } from 'express';
@@ -10,6 +11,7 @@ export class AuthCookieService {
   private readonly cookieOptions: CookieOptions;
   private readonly clearCookieOptions: CookieOptions;
 
+  /** Получает зависимости для работы класса. */
   constructor(config: ConfigService) {
     const expiresInSeconds = jwtDurationToSeconds(
       config.getOrThrow<string>('JWT_EXPIRES_IN'),
@@ -27,10 +29,12 @@ export class AuthCookieService {
     };
   }
 
+  /** Устанавливает cookie сессии. */
   set(response: Response, accessToken: string): void {
     response.cookie(ACCESS_TOKEN_COOKIE, accessToken, this.cookieOptions);
   }
 
+  /** Удаляет cookie сессии. */
   clear(response: Response): void {
     response.clearCookie(ACCESS_TOKEN_COOKIE, this.clearCookieOptions);
   }

@@ -1,9 +1,11 @@
+/** Содержит общий UI-компонент: шапку приложения. */
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
 import { AppBar, Button, Toolbar } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { ResponsiveNavigation } from './ResponsiveNavigation';
 import { UserMenu } from './UserMenu';
 
+/** Отображает шапку приложения. */
 export function AppHeader() {
   return (
     <AppBar component="header" color="default" position="static">

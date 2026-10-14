@@ -1,3 +1,4 @@
+/** Обрабатывает HTTP-запросы для работы с проверкой работоспособности. */
 import { Controller, Get } from '@nestjs/common';
 import {
   ApiOkResponse,
@@ -13,8 +14,10 @@ import { HealthService } from './health.service.js';
 @ApiTags('health')
 @Controller('health')
 export class HealthController {
+  /** Получает зависимости для работы класса. */
   constructor(private readonly healthService: HealthService) {}
 
+  /** Возвращает состояние приложения. */
   @Get()
   @ApiOperation({ summary: 'Check the process and database readiness' })
   @ApiOkResponse({

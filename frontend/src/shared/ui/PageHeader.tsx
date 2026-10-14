@@ -1,3 +1,4 @@
+/** Содержит общий UI-компонент: заголовок страницы. */
 import { Box, Stack, Typography } from '@mui/material';
 import type { ReactNode } from 'react';
 
@@ -7,6 +8,7 @@ interface PageHeaderProps {
   actions?: ReactNode;
 }
 
+/** Отображает заголовок страницы. */
 export function PageHeader({ title, description, actions }: PageHeaderProps) {
   return (
     <Stack

@@ -1,3 +1,4 @@
+/** Описывает ответ API с данными профиля. */
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserResponseDto {

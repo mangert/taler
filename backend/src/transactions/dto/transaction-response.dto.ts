@@ -1,3 +1,4 @@
+/** Описывает ответ API с данными транзакции. */
 import { ApiProperty } from '@nestjs/swagger';
 
 export class TransactionResponseDto {

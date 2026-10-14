@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с повторяющимися операциями: форму повторяющейся операции. */
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Alert,
@@ -31,6 +32,7 @@ interface RecurringRuleFormDialogProps {
   onSave(values: RecurringRuleFormValues): Promise<void>;
 }
 
+/** Отображает форму повторяющейся операции. */
 export function RecurringRuleFormDialog({
   rule,
   categories,

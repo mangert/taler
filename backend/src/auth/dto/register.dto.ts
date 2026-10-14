@@ -1,3 +1,4 @@
+/** Описывает данные учётной записи для API. */
 import { Transform, type TransformFnParams } from 'class-transformer';
 import {
   IsEmail,
@@ -10,14 +11,17 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+/** Нормализует адрес электронной почты. */
 function normalizeEmailValue(value: unknown): unknown {
   return typeof value === 'string' ? value.trim().toLowerCase() : value;
 }
 
+/** Удаляет пробелы по краям строки. */
 function trimValue(value: unknown): unknown {
   return typeof value === 'string' ? value.trim() : value;
 }
 
+/** Нормализует код валюты. */
 function normalizeCurrencyValue(value: unknown): unknown {
   return typeof value === 'string' ? value.trim().toUpperCase() : value;
 }

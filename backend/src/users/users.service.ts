@@ -1,3 +1,4 @@
+/** Реализует операции с профилями пользователей. */
 import {
   BadRequestException,
   ConflictException,
@@ -16,8 +17,10 @@ import { toUserResponse, userProfileSelect } from './user-profile.js';
 
 @Injectable()
 export class UsersService {
+  /** Получает зависимости для работы класса. */
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Обновляет профиль текущего пользователя. */
   async updateProfile(
     userId: string,
     dto: UpdateProfileDto,

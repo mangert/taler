@@ -1,3 +1,4 @@
+/** Содержит общий UI-компонент: адаптивную навигацию. */
 import MenuIcon from '@mui/icons-material/Menu';
 import {
   Box,
@@ -24,6 +25,7 @@ const navigationItems = [
   { label: 'Журнал', to: '/audit-log' },
 ] as const;
 
+/** Отображает адаптивную навигацию. */
 export function ResponsiveNavigation() {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));

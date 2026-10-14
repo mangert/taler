@@ -1,15 +1,19 @@
+/** Нормализует и проверяет поля категории. */
 import { Transform, type TransformFnParams } from 'class-transformer';
 import { IsEnum, IsString, Length, Matches, ValidateIf } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { TransactionType } from '../../generated/prisma/client.js';
 
+/** Проверяет, что поле передано в запросе. */
 const isProvided = (_object: object, value: unknown): boolean =>
   value !== undefined;
 
+/** Удаляет пробелы по краям значения. */
 function trim(value: unknown): unknown {
   return typeof value === 'string' ? value.trim() : value;
 }
 
+/** Приводит значение к верхнему регистру. */
 function uppercase(value: unknown): unknown {
   return typeof value === 'string' ? value.trim().toUpperCase() : value;
 }

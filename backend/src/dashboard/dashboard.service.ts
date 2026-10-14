@@ -1,3 +1,4 @@
+/** Реализует операции с финансовой сводкой. */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import {
   currentBudgetMonth,
@@ -17,25 +18,30 @@ interface MonthlyAmounts {
   expense: Prisma.Decimal;
 }
 
+/** Создаёт нулевую денежную сумму. */
 function zeroAmount(): Prisma.Decimal {
   return new Prisma.Decimal(0);
 }
 
+/** Форматирует месяц для финансовой сводки. */
 function monthString(month: Date): string {
   return month.toISOString().slice(0, 10);
 }
 
+/** Сравнивает текстовые значения. */
 function compareText(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
 @Injectable()
 export class DashboardService {
+  /** Получает зависимости для работы класса. */
   constructor(
     private readonly prisma: PrismaService,
     private readonly clock: DashboardClock,
   ) {}
 
+  /** Возвращает данные финансовой сводки. */
   async get(userId: string, months: number): Promise<DashboardResponseDto> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },

@@ -1,3 +1,4 @@
+/** Описывает ответ API с данными записи аудита. */
 import { ApiProperty } from '@nestjs/swagger';
 import {
   AuditAction,

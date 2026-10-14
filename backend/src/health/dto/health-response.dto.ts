@@ -1,3 +1,4 @@
+/** Описывает ответ API с данными состояния приложения. */
 import { ApiProperty } from '@nestjs/swagger';
 
 export class HealthChecksDto {

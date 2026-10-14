@@ -1,8 +1,10 @@
+/** Вычисляет даты повторяющихся операций. */
 export interface RecurringOccurrence {
   scheduledDate: string;
   nextRunAt: Date;
 }
 
+/** Возвращает локальную дату для часового пояса. */
 export function localDate(now: Date, timeZone: string): string {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone,
@@ -10,11 +12,13 @@ export function localDate(now: Date, timeZone: string): string {
     month: '2-digit',
     day: '2-digit',
   }).formatToParts(now);
+  /** Возвращает значение поля из входных данных. */
   const value = (type: string): string =>
     parts.find((part) => part.type === type)?.value ?? '';
   return `${value('year').padStart(4, '0')}-${value('month')}-${value('day')}`;
 }
 
+/** Находит начало дня в заданном часовом поясе. */
 function zonedStartOfDay(date: string, timeZone: string): Date {
   const utcMidnight = new Date(`${date}T00:00:00.000Z`).getTime();
   let lower = utcMidnight - 36 * 60 * 60 * 1000;
@@ -32,6 +36,7 @@ function zonedStartOfDay(date: string, timeZone: string): Date {
   return new Date(lower);
 }
 
+/** Вычисляет следующую дату повторения. */
 export function nextOccurrence(
   fromDate: string,
   dayOfMonth: number,
@@ -56,6 +61,7 @@ export function nextOccurrence(
   throw new RangeError('Unable to find the next monthly occurrence');
 }
 
+/** Вычисляет дату после текущего повторения. */
 export function followingOccurrence(
   scheduledDate: string,
   dayOfMonth: number,

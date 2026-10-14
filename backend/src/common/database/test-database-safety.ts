@@ -1,3 +1,5 @@
+/** Защищает тесты от подключения к рабочей базе. */
+/** Разбирает адрес подключения к PostgreSQL. */
 function parsePostgresUrl(value: string, variableName: string): URL {
   let url: URL;
 
@@ -14,6 +16,7 @@ function parsePostgresUrl(value: string, variableName: string): URL {
   return url;
 }
 
+/** Определяет имя тестовой базы данных. */
 function databaseIdentity(url: URL): string {
   const port = url.port || '5432';
   const databaseName = decodeURIComponent(url.pathname.slice(1));
@@ -21,6 +24,7 @@ function databaseIdentity(url: URL): string {
   return `${url.hostname.toLowerCase()}:${port}/${databaseName}`;
 }
 
+/** Проверяет безопасность адреса тестовой базы. */
 export function assertDedicatedTestDatabaseUrl(
   testDatabaseUrl: string | undefined,
   developmentDatabaseUrl: string | undefined,

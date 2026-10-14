@@ -1,3 +1,4 @@
+/** Описывает клиентские запросы к API журнала аудита. */
 import type { components, operations } from './schema';
 import { apiRequest } from './http';
 
@@ -19,6 +20,7 @@ export interface AuditListParams {
 }
 
 export const auditApi = {
+  /** Загружает список записей аудита из API. */
   list: (params: AuditListParams): Promise<AuditList> => {
     const query: AuditQuery = {
       page: params.page,

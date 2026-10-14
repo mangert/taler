@@ -1,3 +1,4 @@
+/** Реализует операции с повторяющимися операциями. */
 import {
   BadRequestException,
   Injectable,
@@ -19,6 +20,7 @@ import {
 import { UpdateRecurringTransactionDto } from './dto/update-recurring-transaction.dto.js';
 import { nextOccurrence } from './recurrence.js';
 
+/** Преобразует правило в ответ API. */
 function response(rule: RecurringTransaction): RecurringTransactionResponseDto {
   return {
     id: rule.id,
@@ -38,6 +40,7 @@ function response(rule: RecurringTransaction): RecurringTransactionResponseDto {
   };
 }
 
+/** Проверяет календарную дату правила. */
 function calendarDate(value: string): Date {
   const result = new Date(`${value}T00:00:00.000Z`);
   if (
@@ -53,6 +56,7 @@ function calendarDate(value: string): Date {
   return result;
 }
 
+/** Проверяет и преобразует денежную сумму. */
 function money(
   amountInput: string,
   currency: string,
@@ -91,8 +95,10 @@ function money(
 
 @Injectable()
 export class RecurringTransactionsService {
+  /** Получает зависимости для работы класса. */
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Возвращает список правил повторяющихся операций. */
   async list(
     userId: string,
     query: ListRecurringTransactionsQueryDto,
@@ -115,6 +121,7 @@ export class RecurringTransactionsService {
     };
   }
 
+  /** Возвращает правило повторяющейся операции. */
   async get(
     userId: string,
     id: string,
@@ -122,6 +129,7 @@ export class RecurringTransactionsService {
     return response(await this.getOwned(this.prisma, userId, id));
   }
 
+  /** Создаёт правило повторяющейся операции. */
   async create(
     userId: string,
     dto: CreateRecurringTransactionDto,
@@ -161,6 +169,7 @@ export class RecurringTransactionsService {
     });
   }
 
+  /** Обновляет правило повторяющейся операции. */
   async update(
     userId: string,
     id: string,
@@ -240,6 +249,7 @@ export class RecurringTransactionsService {
     }
   }
 
+  /** Удаляет правило повторяющейся операции. */
   async remove(userId: string, id: string): Promise<void> {
     try {
       await this.prisma.recurringTransaction.delete({ where: { id, userId } });
@@ -253,6 +263,7 @@ export class RecurringTransactionsService {
     }
   }
 
+  /** Находит текущего пользователя. */
   private async getUser(
     userId: string,
   ): Promise<{ baseCurrency: string; timeZone: string }> {
@@ -268,6 +279,7 @@ export class RecurringTransactionsService {
     return user;
   }
 
+  /** Находит запись текущего пользователя. */
   private async getOwned(
     client: Prisma.TransactionClient,
     userId: string,
@@ -280,6 +292,7 @@ export class RecurringTransactionsService {
     return rule;
   }
 
+  /** Проверяет категорию пользователя. */
   private async assertCategory(
     client: Prisma.TransactionClient,
     userId: string,
@@ -301,6 +314,7 @@ export class RecurringTransactionsService {
       });
   }
 
+  /** Проверяет диапазон дат правила. */
   private assertDateRange(startDate: Date, endDate: Date | null): void {
     if (endDate && endDate < startDate)
       throw new BadRequestException({
@@ -309,6 +323,7 @@ export class RecurringTransactionsService {
       });
   }
 
+  /** Создаёт ответ об отсутствующей записи. */
   private notFound(): never {
     throw new NotFoundException({
       code: 'RECURRING_RULE_NOT_FOUND',

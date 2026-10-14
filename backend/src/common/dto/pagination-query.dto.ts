@@ -1,3 +1,4 @@
+/** Описывает данные пагинации для API. */
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, Max, Min } from 'class-validator';

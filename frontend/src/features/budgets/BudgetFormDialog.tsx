@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с бюджетами: форму бюджета. */
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
@@ -28,6 +29,7 @@ interface BudgetFormDialogProps {
   onSave(values: BudgetFormValues): Promise<void>;
 }
 
+/** Отображает форму бюджета. */
 export function BudgetFormDialog({
   budget,
   month,

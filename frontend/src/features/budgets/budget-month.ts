@@ -1,5 +1,7 @@
+/** Вычисляет календарные месяцы для бюджетов. */
 const monthPattern = /^\d{4}-(0[1-9]|1[0-2])-01$/;
 
+/** Определяет текущий бюджетный месяц. */
 export function currentBudgetMonth(timeZone: string, now = new Date()): string {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone,
@@ -11,6 +13,7 @@ export function currentBudgetMonth(timeZone: string, now = new Date()): string {
   return `${year}-${month}-01`;
 }
 
+/** Определяет выбранный бюджетный месяц. */
 export function selectedBudgetMonth(
   value: string | null,
   timeZone: string,
@@ -20,12 +23,14 @@ export function selectedBudgetMonth(
     : currentBudgetMonth(timeZone);
 }
 
+/** Сдвигает бюджетный месяц на заданное число месяцев. */
 export function shiftBudgetMonth(month: string, offset: number): string {
   const date = new Date(`${month}T00:00:00.000Z`);
   date.setUTCMonth(date.getUTCMonth() + offset);
   return date.toISOString().slice(0, 7) + '-01';
 }
 
+/** Форматирует подпись бюджетного месяца. */
 export function budgetMonthLabel(month: string): string {
   return new Intl.DateTimeFormat('ru-RU', {
     month: 'long',

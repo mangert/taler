@@ -1,3 +1,5 @@
+/** Подбирает цвет значка категории. */
+/** Выбирает контрастный цвет значка категории. */
 export function pickCategoryIconColor(
   background: string,
 ): '#000000' | '#FFFFFF' {

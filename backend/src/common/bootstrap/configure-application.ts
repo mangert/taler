@@ -1,3 +1,4 @@
+/** Настраивает общие правила обработки запросов. */
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
@@ -11,6 +12,7 @@ type CorsOriginCallback = (
   origin?: boolean | string | RegExp | (string | RegExp)[],
 ) => void;
 
+/** Настраивает общие правила обработки HTTP-запросов. */
 export function configureApplication(app: INestApplication): void {
   const config = app.get(ConfigService);
   const frontendOrigin = config.getOrThrow<string>('FRONTEND_ORIGIN');

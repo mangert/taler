@@ -1,3 +1,4 @@
+/** Обрабатывает HTTP-запросы для работы с повторяющимися операциями. */
 import {
   Body,
   Controller,
@@ -42,8 +43,10 @@ import { RecurringTransactionsService } from './recurring-transactions.service.j
 @UseGuards(JwtAuthGuard)
 @Controller('recurring-transactions')
 export class RecurringTransactionsController {
+  /** Получает зависимости для работы класса. */
   constructor(private readonly rules: RecurringTransactionsService) {}
 
+  /** Возвращает список правил повторяющихся операций. */
   @Get()
   @ApiOperation({ summary: 'List owned recurring transaction rules' })
   @ApiOkResponse({ type: RecurringTransactionListResponseDto })
@@ -55,6 +58,7 @@ export class RecurringTransactionsController {
     return this.rules.list(user.id, query);
   }
 
+  /** Создаёт правило повторяющейся операции. */
   @Post()
   @ApiOperation({
     summary: 'Create an owned monthly recurring transaction rule',
@@ -69,6 +73,7 @@ export class RecurringTransactionsController {
     return this.rules.create(user.id, body);
   }
 
+  /** Возвращает правило повторяющейся операции. */
   @Get(':id')
   @ApiOperation({ summary: 'Get an owned recurring transaction rule' })
   @ApiOkResponse({ type: RecurringTransactionResponseDto })
@@ -80,6 +85,7 @@ export class RecurringTransactionsController {
     return this.rules.get(user.id, id);
   }
 
+  /** Обновляет правило повторяющейся операции. */
   @Patch(':id')
   @ApiOperation({
     summary: 'Update or pause an owned recurring transaction rule',
@@ -95,6 +101,7 @@ export class RecurringTransactionsController {
     return this.rules.update(user.id, id, body);
   }
 
+  /** Удаляет правило повторяющейся операции. */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete an owned recurring transaction rule' })

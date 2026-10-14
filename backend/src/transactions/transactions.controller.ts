@@ -1,3 +1,4 @@
+/** Обрабатывает HTTP-запросы для работы с транзакциями. */
 import {
   Body,
   Controller,
@@ -47,11 +48,13 @@ import { TransactionsService } from './transactions.service.js';
 @UseGuards(JwtAuthGuard)
 @Controller('transactions')
 export class TransactionsController {
+  /** Получает зависимости для работы класса. */
   constructor(
     private readonly transactions: TransactionsService,
     private readonly csv: CsvService,
   ) {}
 
+  /** Возвращает список транзакций. */
   @Get()
   @ApiOperation({ summary: 'List owned transactions with combinable filters' })
   @ApiOkResponse({ type: TransactionListResponseDto })
@@ -63,6 +66,7 @@ export class TransactionsController {
     return this.transactions.list(user.id, query);
   }
 
+  /** Создаёт транзакцию. */
   @Post()
   @ApiOperation({
     summary: 'Create a transaction and calculate its base amount',
@@ -80,6 +84,7 @@ export class TransactionsController {
     return this.transactions.create(user.id, body);
   }
 
+  /** Экспортирует транзакции в CSV. */
   @Get('export')
   @ApiOperation({
     summary: 'Export all owned transactions matching list filters as CSV',
@@ -105,6 +110,7 @@ export class TransactionsController {
     stream.pipe(response);
   }
 
+  /** Возвращает транзакцию. */
   @Get(':id')
   @ApiOperation({ summary: 'Get an owned transaction' })
   @ApiOkResponse({ type: TransactionResponseDto })
@@ -116,6 +122,7 @@ export class TransactionsController {
     return this.transactions.get(user.id, id);
   }
 
+  /** Обновляет транзакцию. */
   @Patch(':id')
   @ApiOperation({
     summary: 'Update an owned transaction and recalculate its base amount',
@@ -131,6 +138,7 @@ export class TransactionsController {
     return this.transactions.update(user.id, id, body);
   }
 
+  /** Удаляет транзакцию. */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete an owned transaction' })

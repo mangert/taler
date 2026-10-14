@@ -1,3 +1,4 @@
+/** Реализует операции с бюджетами. */
 import {
   BadRequestException,
   ConflictException,
@@ -22,6 +23,7 @@ import { ListBudgetsQueryDto } from './dto/list-budgets-query.dto.js';
 import { UpdateBudgetDto } from './dto/update-budget.dto.js';
 import { currentBudgetMonth, nextBudgetMonth } from './budget-month.js';
 
+/** Преобразует запись базы данных в ответ API. */
 function toResponse(
   budget: Budget,
   currency: string,
@@ -49,11 +51,13 @@ function toResponse(
 
 @Injectable()
 export class BudgetsService {
+  /** Получает зависимости для работы класса. */
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
   ) {}
 
+  /** Возвращает список бюджетов. */
   async list(
     userId: string,
     query: ListBudgetsQueryDto,
@@ -105,6 +109,7 @@ export class BudgetsService {
     };
   }
 
+  /** Возвращает бюджет. */
   async get(userId: string, id: string): Promise<BudgetResponseDto> {
     const user = await this.getUser(userId);
     const budget = await this.getOwned(this.prisma, userId, id);
@@ -112,6 +117,7 @@ export class BudgetsService {
     return toResponse(budget, user.baseCurrency, spent);
   }
 
+  /** Создаёт бюджет. */
   async create(
     userId: string,
     dto: CreateBudgetDto,
@@ -151,6 +157,7 @@ export class BudgetsService {
     }
   }
 
+  /** Обновляет бюджет. */
   async update(
     userId: string,
     id: string,
@@ -208,6 +215,7 @@ export class BudgetsService {
     }
   }
 
+  /** Удаляет бюджет. */
   async remove(userId: string, id: string): Promise<void> {
     try {
       await this.prisma.$transaction(async (transaction) => {
@@ -231,6 +239,7 @@ export class BudgetsService {
     }
   }
 
+  /** Находит запись текущего пользователя. */
   private async getOwned(
     transaction: Prisma.TransactionClient,
     userId: string,
@@ -243,6 +252,7 @@ export class BudgetsService {
     return budget;
   }
 
+  /** Проверяет, что категория предназначена для расходов. */
   private async assertExpenseCategory(
     transaction: Prisma.TransactionClient,
     userId: string,
@@ -265,6 +275,7 @@ export class BudgetsService {
     }
   }
 
+  /** Подсчитывает расходы за бюджетный месяц. */
   private async spent(
     transaction: Prisma.TransactionClient,
     userId: string,
@@ -285,6 +296,7 @@ export class BudgetsService {
     return result._sum.baseAmount ?? new Prisma.Decimal(0);
   }
 
+  /** Создаёт ответ о недействительной сессии. */
   private invalidSession(): never {
     throw new UnauthorizedException({
       code: 'INVALID_SESSION',
@@ -292,6 +304,7 @@ export class BudgetsService {
     });
   }
 
+  /** Находит текущего пользователя. */
   private async getUser(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -301,6 +314,7 @@ export class BudgetsService {
     return user;
   }
 
+  /** Создаёт ответ об отсутствующем бюджете. */
   private budgetNotFound(): never {
     throw new NotFoundException({
       code: 'BUDGET_NOT_FOUND',
@@ -308,6 +322,7 @@ export class BudgetsService {
     });
   }
 
+  /** Создаёт ответ о недопустимом лимите. */
   private invalidLimit(): never {
     throw new BadRequestException({
       code: 'INVALID_BUDGET_LIMIT',
@@ -315,6 +330,7 @@ export class BudgetsService {
     });
   }
 
+  /** Создаёт ответ о конфликте бюджетов. */
   private budgetConflict(): never {
     throw new ConflictException({
       code: 'BUDGET_EXISTS',

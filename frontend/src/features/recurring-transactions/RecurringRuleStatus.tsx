@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с повторяющимися операциями: статус правила. */
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import PauseCircleOutlinedIcon from '@mui/icons-material/PauseCircleOutlined';
 import { Chip, Stack, Typography } from '@mui/material';
@@ -7,6 +8,7 @@ interface RecurringRuleStatusProps {
   compact?: boolean;
 }
 
+/** Отображает статус правила. */
 export function RecurringRuleStatus({
   isActive,
   compact = false,

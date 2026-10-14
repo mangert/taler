@@ -1,3 +1,4 @@
+/** Готовит данные финансовой сводки для отображения. */
 import type { Dashboard } from '../../shared/api/dashboard';
 
 export interface CategoryChartPoint {
@@ -21,6 +22,7 @@ export interface DashboardViewModel {
   topCategories: CategoryChartPoint[];
 }
 
+/** Форматирует сумму финансовой сводки. */
 export function formatDashboardAmount(
   amount: string,
   currency: string,
@@ -32,6 +34,7 @@ export function formatDashboardAmount(
   return `${match[1] === '-' ? '−' : ''}${integer},${fraction} ${currency}`;
 }
 
+/** Форматирует месяц финансовой сводки. */
 export function formatDashboardMonth(month: string): string {
   return new Intl.DateTimeFormat('ru-RU', {
     month: 'short',
@@ -40,7 +43,9 @@ export function formatDashboardMonth(month: string): string {
   }).format(new Date(`${month}T00:00:00.000Z`));
 }
 
+/** Подготавливает данные для отображения сводки. */
 export function toDashboardViewModel(data: Dashboard): DashboardViewModel {
+  /** Преобразует категорию в точку диаграммы. */
   const categoryPoint = (
     category: Dashboard['expensesByCategory'][number],
   ): CategoryChartPoint => ({

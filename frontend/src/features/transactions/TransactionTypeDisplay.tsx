@@ -1,8 +1,10 @@
+/** Содержит компонент для работы с транзакциями: тип транзакции. */
 import TrendingDownRoundedIcon from '@mui/icons-material/TrendingDownRounded';
 import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import { Stack, Typography } from '@mui/material';
 import type { TransactionType } from '../../shared/api/transactions';
 
+/** Отображает тип транзакции. */
 export function TransactionTypeDisplay({ type }: { type: TransactionType }) {
   const income = type === 'INCOME';
   const label = income ? 'Доход' : 'Расход';

@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с транзакциями: форму транзакции. */
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Alert,
@@ -32,6 +33,7 @@ interface TransactionFormDialogProps {
   onSave(values: TransactionFormValues): Promise<void>;
 }
 
+/** Формирует начальные значения формы. */
 function defaults(
   transaction: Transaction | null,
   baseCurrency: string,
@@ -47,6 +49,7 @@ function defaults(
   };
 }
 
+/** Отображает форму транзакции. */
 export function TransactionFormDialog({
   transaction,
   categories,

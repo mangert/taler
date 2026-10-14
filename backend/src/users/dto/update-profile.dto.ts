@@ -1,3 +1,4 @@
+/** Описывает поля обновления профиля для API. */
 import { Transform, type TransformFnParams } from 'class-transformer';
 import {
   IsString,
@@ -9,14 +10,17 @@ import {
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
+/** Удаляет пробелы по краям строки. */
 function trimValue(value: unknown): unknown {
   return typeof value === 'string' ? value.trim() : value;
 }
 
+/** Нормализует код валюты. */
 function normalizeCurrencyValue(value: unknown): unknown {
   return typeof value === 'string' ? value.trim().toUpperCase() : value;
 }
 
+/** Проверяет, что поле передано в запросе. */
 const isProvided = (_object: object, value: unknown): boolean =>
   value !== undefined;
 

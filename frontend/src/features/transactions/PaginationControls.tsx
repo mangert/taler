@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с транзакциями: управление страницами списка. */
 import { Pagination, Stack, Typography } from '@mui/material';
 
 interface PaginationControlsProps {
@@ -7,6 +8,7 @@ interface PaginationControlsProps {
   onChange(page: number): void;
 }
 
+/** Отображает управление страницами списка. */
 export function PaginationControls({
   page,
   totalPages,

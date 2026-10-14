@@ -1,3 +1,4 @@
+/** Перехватывает ошибки отображения страниц. */
 import { Box } from '@mui/material';
 import { Component, type ReactNode } from 'react';
 import { ErrorState } from '../shared/ui/PageStates';
@@ -16,10 +17,12 @@ export class ErrorBoundary extends Component<
 > {
   state: ErrorBoundaryState = { hasError: false };
 
+  /** Переводит ошибку в состояние границы ошибок. */
   static getDerivedStateFromError(): ErrorBoundaryState {
     return { hasError: true };
   }
 
+  /** Отображает содержимое или сообщение об ошибке. */
   render(): ReactNode {
     if (this.state.hasError) {
       return (

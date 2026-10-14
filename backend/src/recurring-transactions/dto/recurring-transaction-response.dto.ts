@@ -1,3 +1,4 @@
+/** Описывает ответ API с данными повторяющейся операции. */
 import { ApiProperty } from '@nestjs/swagger';
 import { TransactionType } from '../../generated/prisma/client.js';
 

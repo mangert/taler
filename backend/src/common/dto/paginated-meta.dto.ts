@@ -1,3 +1,4 @@
+/** Описывает данные пагинации для API. */
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PaginatedMetaDto {
@@ -13,6 +14,7 @@ export class PaginatedMetaDto {
   @ApiProperty({ example: 3, minimum: 0 })
   totalPages!: number;
 
+  /** Заполняет метаданные пагинации. */
   constructor(values: PaginatedMetaDto) {
     Object.assign(this, values);
   }

@@ -1,3 +1,4 @@
+/** Описывает клиентские запросы к API импорта транзакций. */
 import type { components } from './schema';
 import { apiRequest } from './http';
 
@@ -14,6 +15,7 @@ interface TransactionImportMapping {
 }
 
 export const transactionImportsApi = {
+  /** Отправляет CSV-файл на импорт. */
   import: (
     file: File,
     mapping: TransactionImportMapping,

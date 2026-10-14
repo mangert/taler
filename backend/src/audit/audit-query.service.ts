@@ -1,3 +1,4 @@
+/** Реализует операции с журналом аудита. */
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -9,6 +10,7 @@ import { ListAuditLogQueryDto } from './dto/list-audit-log-query.dto.js';
 
 const dayMilliseconds = 24 * 60 * 60 * 1000;
 
+/** Возвращает начало дня по UTC. */
 function utcDay(value: string): Date {
   const date = new Date(value + 'T00:00:00.000Z');
   if (
@@ -25,8 +27,10 @@ function utcDay(value: string): Date {
 
 @Injectable()
 export class AuditQueryService {
+  /** Получает зависимости для работы класса. */
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Возвращает список записей аудита. */
   async list(
     userId: string,
     query: ListAuditLogQueryDto,

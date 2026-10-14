@@ -1,3 +1,4 @@
+/** Собирает страницу бюджетов. */
 import {
   Alert,
   Button,
@@ -24,11 +25,13 @@ import { EmptyState, ErrorState, PageSkeleton } from '../shared/ui/PageStates';
 
 const pageSize = 20;
 
+/** Разбирает номер страницы из URL. */
 function parsePage(value: string | null): number {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : 1;
 }
 
+/** Отображает страницу бюджетов. */
 export function BudgetsPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -70,6 +73,7 @@ export function BudgetsPage() {
       }),
   });
 
+  /** Сохраняет созданный или изменённый бюджет. */
   const saveBudget = async (values: BudgetFormValues): Promise<void> => {
     const input = {
       categoryId: values.categoryId,
@@ -85,26 +89,31 @@ export function BudgetsPage() {
     if (input.month !== month) changeMonth(input.month);
   };
 
+  /** Открывает форму создания записи. */
   const openCreate = (): void => {
     setEditingBudget(null);
     setFormOpen(true);
   };
+  /** Открывает форму редактирования записи. */
   const openEdit = (budget: Budget): void => {
     setEditingBudget(budget);
     setFormOpen(true);
   };
+  /** Подтверждает удаление выбранной записи. */
   const confirmDelete = async (budget: Budget): Promise<void> => {
     await deleteBudget.mutateAsync(budget.id);
     await invalidateBudgetDependents(queryClient, userId);
     setDeletingBudget(null);
   };
 
+  /** Переключает выбранный бюджетный месяц. */
   const changeMonth = (nextMonth: string): void => {
     const next = new URLSearchParams(searchParams);
     next.set('month', nextMonth);
     next.delete('page');
     setSearchParams(next);
   };
+  /** Переключает страницу списка. */
   const changePage = (nextPage: number): void => {
     const next = new URLSearchParams(searchParams);
     if (nextPage === 1) next.delete('page');

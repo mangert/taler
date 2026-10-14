@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с журналом аудита: журнал аудита карточками. */
 import {
   Box,
   Button,
@@ -28,6 +29,7 @@ const actionColors = {
   DELETE: 'error',
 } as const;
 
+/** Отображает журнал аудита карточками. */
 export function AuditCardList({
   entries,
   timeZone,

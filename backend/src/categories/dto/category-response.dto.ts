@@ -1,3 +1,4 @@
+/** Описывает ответ API с данными категории. */
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CategoryResponseDto {

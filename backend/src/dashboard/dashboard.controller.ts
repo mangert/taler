@@ -1,3 +1,4 @@
+/** Обрабатывает HTTP-запросы для работы с финансовой сводкой. */
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -21,8 +22,10 @@ import { DashboardResponseDto } from './dto/dashboard-response.dto.js';
 @UseGuards(JwtAuthGuard)
 @Controller('dashboard')
 export class DashboardController {
+  /** Получает зависимости для работы класса. */
   constructor(private readonly dashboard: DashboardService) {}
 
+  /** Возвращает данные финансовой сводки. */
   @Get()
   @ApiOperation({ summary: 'Get owned financial dashboard for recent months' })
   @ApiOkResponse({ type: DashboardResponseDto })

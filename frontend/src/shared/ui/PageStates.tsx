@@ -1,3 +1,4 @@
+/** Содержит состояния загрузки, ошибки и пустой страницы. */
 import {
   Alert,
   Box,
@@ -22,6 +23,7 @@ interface PageSkeletonProps {
   heights?: readonly number[];
 }
 
+/** Отображает состояние загрузки. */
 export function LoadingState({ message }: MessageProps) {
   return (
     <Stack
@@ -37,6 +39,7 @@ export function LoadingState({ message }: MessageProps) {
   );
 }
 
+/** Отображает состояние ошибки. */
 export function ErrorState({
   message,
   onRetry,
@@ -54,6 +57,7 @@ export function ErrorState({
   );
 }
 
+/** Отображает пустое состояние. */
 export function EmptyState({ message }: MessageProps) {
   return (
     <Alert severity="info" role="status">
@@ -62,6 +66,7 @@ export function EmptyState({ message }: MessageProps) {
   );
 }
 
+/** Отображает макет страницы на время загрузки. */
 export function PageSkeleton({ label, heights = [96, 96] }: PageSkeletonProps) {
   return (
     <Stack role="status" aria-label={label} spacing={2}>

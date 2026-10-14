@@ -1,3 +1,4 @@
+/** Собирает страницу импорта транзакций. */
 import { Container, Stack, Typography } from '@mui/material';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -26,6 +27,7 @@ import {
   type TransactionImportResult,
 } from '../shared/api/transaction-imports';
 
+/** Отображает страницу импорта транзакций. */
 export function TransactionImportPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -43,6 +45,7 @@ export function TransactionImportPage() {
       transactionImportsApi.import(file, mapping),
   });
 
+  /** Выбирает CSV-файл для импорта. */
   const selectFile = async (selected: File): Promise<void> => {
     setFile(selected);
     setSample(null);
@@ -65,6 +68,7 @@ export function TransactionImportPage() {
     }
   };
 
+  /** Отправляет CSV-файл на импорт. */
   const importFile = async (): Promise<void> => {
     if (!file || !mapping) return;
     setImportError(null);

@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с категориями: выбор цвета. */
 import { TextField } from '@mui/material';
 
 interface ColorPickerProps {
@@ -6,6 +7,7 @@ interface ColorPickerProps {
   error?: string;
 }
 
+/** Отображает выбор цвета. */
 export function ColorPicker({ value, onChange, error }: ColorPickerProps) {
   return (
     <TextField

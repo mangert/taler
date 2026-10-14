@@ -1,3 +1,4 @@
+/** Задаёт палитру и стили интерфейса. */
 import { createTheme } from '@mui/material/styles';
 
 export const appTheme = createTheme({

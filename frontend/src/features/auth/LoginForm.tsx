@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с аутентификацией: форму входа. */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
@@ -10,6 +11,7 @@ import { PasswordField } from '../../shared/ui/PasswordField';
 import { loginSchema, type LoginFormValues } from './auth-schemas';
 import { useAuth } from './auth-context';
 
+/** Отображает форму входа. */
 export function LoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();

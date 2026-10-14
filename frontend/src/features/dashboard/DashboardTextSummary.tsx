@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с финансовой сводкой: текстовую финансовую сводку. */
 import { Paper, Stack, Typography } from '@mui/material';
 import type { Dashboard } from '../../shared/api/dashboard';
 import { dashboardPanelSx } from './dashboard-layout';
@@ -10,6 +11,7 @@ interface Props {
   dashboard: Dashboard;
 }
 
+/** Отображает текстовую финансовую сводку. */
 export function DashboardTextSummary({ dashboard }: Props) {
   const hasActivity =
     dashboard.totals.income !== '0.0000' ||

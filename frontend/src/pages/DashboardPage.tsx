@@ -1,3 +1,4 @@
+/** Собирает страницу финансовой сводки. */
 import { Box, Stack, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { DashboardTextSummary } from '../features/dashboard/DashboardTextSummary';
@@ -13,6 +14,7 @@ import { ErrorState, PageSkeleton } from '../shared/ui/PageStates';
 
 const months = 6;
 
+/** Отображает страницу финансовой сводки. */
 export function DashboardPage() {
   const { user } = useAuth();
   const userId = user?.id ?? '';
@@ -46,6 +48,7 @@ export function DashboardPage() {
   );
 }
 
+/** Отображает содержимое финансовой сводки. */
 function DashboardContent({ dashboard }: { dashboard: Dashboard }) {
   const view = toDashboardViewModel(dashboard);
 

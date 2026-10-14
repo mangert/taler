@@ -1,5 +1,7 @@
+/** Проверяет конфигурацию окружения при запуске. */
 const jwtExpirationPattern = /^[1-9]\d*(?:ms|s|m|h|d|w)$/;
 
+/** Проверяет обязательную строковую настройку. */
 function requireString(config: Record<string, unknown>, key: string): string {
   const value = config[key];
 
@@ -10,6 +12,7 @@ function requireString(config: Record<string, unknown>, key: string): string {
   return value.trim();
 }
 
+/** Проверяет положительную целочисленную настройку. */
 function requirePositiveInteger(
   config: Record<string, unknown>,
   key: string,
@@ -30,6 +33,7 @@ function requirePositiveInteger(
   return parsed;
 }
 
+/** Проверяет URL в настройках окружения. */
 function requireUrl(
   config: Record<string, unknown>,
   key: string,
@@ -50,6 +54,7 @@ function requireUrl(
   }
 }
 
+/** Проверяет и нормализует переменные окружения. */
 export function validateEnvironment(
   config: Record<string, unknown>,
 ): Record<string, unknown> {

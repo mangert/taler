@@ -1,3 +1,4 @@
+/** Связывает зависимости для работы с проверкой работоспособности. */
 import { Module } from '@nestjs/common';
 
 import { DatabaseHealthIndicator } from './database-health.indicator.js';

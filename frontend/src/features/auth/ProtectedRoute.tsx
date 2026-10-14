@@ -1,8 +1,10 @@
+/** Содержит компонент для работы с аутентификацией: защищённый маршрут. */
 import { Box } from '@mui/material';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { ErrorState, LoadingState } from '../../shared/ui/PageStates';
 import { useAuth } from './auth-context';
 
+/** Отображает защищённый маршрут. */
 export function ProtectedRoute() {
   const { user, isLoading, error, retry } = useAuth();
   const location = useLocation();

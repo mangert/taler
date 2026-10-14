@@ -1,3 +1,4 @@
+/** Описывает данные транзакции для API. */
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, type TransformFnParams } from 'class-transformer';
 import {
@@ -10,6 +11,7 @@ import {
 } from 'class-validator';
 import { TransactionType } from '../../generated/prisma/client.js';
 
+/** Проверяет, что значение передано. */
 const provided = (_object: object, value: unknown): boolean =>
   value !== undefined;
 export const amountPattern = /^(?:0|[1-9]\d{0,14})(?:\.\d{1,4})?$/;

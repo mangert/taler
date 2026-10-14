@@ -1,3 +1,4 @@
+/** Подключает провайдеры темы, запросов и сессии. */
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
@@ -10,6 +11,7 @@ interface AppProvidersProps {
   queryClient?: QueryClient;
 }
 
+/** Подключает провайдеры приложения. */
 export function AppProviders({ children, queryClient }: AppProvidersProps) {
   const [defaultQueryClient] = useState(createAppQueryClient);
 

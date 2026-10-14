@@ -1,3 +1,4 @@
+/** Преобразует ошибки сервера в единый ответ API. */
 import {
   ArgumentsHost,
   Catch,
@@ -10,10 +11,12 @@ import { Response } from 'express';
 
 import { ApiErrorResponseDto } from './dto/api-error-response.dto.js';
 
+/** Проверяет, что значение является объектом. */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
+/** Выбирает код ошибки по HTTP-статусу. */
 function defaultErrorCode(statusCode: number): string {
   const name = HttpStatus[statusCode];
 
@@ -24,6 +27,7 @@ function defaultErrorCode(statusCode: number): string {
 export class ApiExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(ApiExceptionFilter.name);
 
+  /** Преобразует исключение в ответ API. */
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
     const isHttpException = exception instanceof HttpException;

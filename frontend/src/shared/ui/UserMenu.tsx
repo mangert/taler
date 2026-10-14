@@ -1,19 +1,24 @@
+/** Содержит общий UI-компонент: меню пользователя. */
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import { Button, Menu, MenuItem } from '@mui/material';
 import { useState, type MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../features/auth/auth-context';
 
+/** Отображает меню пользователя. */
 export function UserMenu() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [anchorElement, setAnchorElement] = useState<HTMLElement | null>(null);
   const displayName = user?.displayName ?? 'Пользователь';
 
+  /** Открывает меню пользователя. */
   const openMenu = (event: MouseEvent<HTMLElement>): void => {
     setAnchorElement(event.currentTarget);
   };
+  /** Закрывает меню пользователя. */
   const closeMenu = (): void => setAnchorElement(null);
+  /** Завершает сессию пользователя. */
   const signOut = async (): Promise<void> => {
     closeMenu();
     try {

@@ -1,3 +1,4 @@
+/** Проверяет данные форм входа и регистрации. */
 import { z } from 'zod';
 import { isValidTimeZone } from '../../shared/lib/time-zone';
 

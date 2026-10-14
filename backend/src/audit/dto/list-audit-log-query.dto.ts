@@ -1,3 +1,4 @@
+/** Описывает параметры списка записей аудита для API. */
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsInt, Matches, Max, Min, ValidateIf } from 'class-validator';
@@ -6,6 +7,7 @@ import {
   AuditableEntityType,
 } from '../../generated/prisma/client.js';
 
+/** Проверяет, что значение передано. */
 const provided = (_object: object, value: unknown): boolean =>
   value !== undefined;
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;

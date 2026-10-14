@@ -1,3 +1,4 @@
+/** Реализует операции с категориями. */
 import {
   BadRequestException,
   ConflictException,
@@ -14,6 +15,7 @@ import { CreateCategoryDto } from './dto/create-category.dto.js';
 import { ListCategoriesQueryDto } from './dto/list-categories-query.dto.js';
 import { UpdateCategoryDto } from './dto/update-category.dto.js';
 
+/** Преобразует запись базы данных в ответ API. */
 function toResponse(category: Category): CategoryResponseDto {
   return {
     id: category.id,
@@ -26,6 +28,7 @@ function toResponse(category: Category): CategoryResponseDto {
   };
 }
 
+/** Проверяет код ошибки Prisma. */
 function hasPrismaCode(error: unknown, code: string): boolean {
   return (
     error instanceof Prisma.PrismaClientKnownRequestError && error.code === code
@@ -34,8 +37,10 @@ function hasPrismaCode(error: unknown, code: string): boolean {
 
 @Injectable()
 export class CategoriesService {
+  /** Получает зависимости для работы класса. */
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Возвращает список категорий. */
   async list(
     userId: string,
     query: ListCategoriesQueryDto,
@@ -64,10 +69,12 @@ export class CategoriesService {
     };
   }
 
+  /** Возвращает категорию. */
   async get(userId: string, id: string): Promise<CategoryResponseDto> {
     return toResponse(await this.getOwned(userId, id));
   }
 
+  /** Создаёт категорию. */
   async create(
     userId: string,
     dto: CreateCategoryDto,
@@ -90,6 +97,7 @@ export class CategoriesService {
     }
   }
 
+  /** Обновляет категорию. */
   async update(
     userId: string,
     id: string,
@@ -133,6 +141,7 @@ export class CategoriesService {
     }
   }
 
+  /** Удаляет категорию. */
   async remove(userId: string, id: string): Promise<void> {
     await this.getOwned(userId, id);
     const where = { userId, categoryId: id };
@@ -151,6 +160,7 @@ export class CategoriesService {
     }
   }
 
+  /** Находит запись текущего пользователя. */
   private async getOwned(userId: string, id: string): Promise<Category> {
     const category = await this.prisma.category.findFirst({
       where: { id, userId },
@@ -159,6 +169,7 @@ export class CategoriesService {
     return category;
   }
 
+  /** Проверяет уникальность названия категории. */
   private async assertUniqueName(
     userId: string,
     name: string,
@@ -174,6 +185,7 @@ export class CategoriesService {
     if (existing) this.nameConflict();
   }
 
+  /** Создаёт ответ о конфликте названий. */
   private nameConflict(): never {
     throw new ConflictException({
       code: 'CATEGORY_NAME_EXISTS',
@@ -181,6 +193,7 @@ export class CategoriesService {
     });
   }
 
+  /** Создаёт ответ об используемой категории. */
   private inUse(): never {
     throw new ConflictException({
       code: 'CATEGORY_IN_USE',
@@ -188,6 +201,7 @@ export class CategoriesService {
     });
   }
 
+  /** Создаёт ответ об отсутствующей записи. */
   private notFound(): never {
     throw new NotFoundException({
       code: 'CATEGORY_NOT_FOUND',

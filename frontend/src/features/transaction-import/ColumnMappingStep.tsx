@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с импортом транзакций: шаг сопоставления столбцов. */
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Box,
@@ -21,6 +22,7 @@ interface ColumnMappingStepProps {
   onContinue: (mapping: ColumnMapping) => void;
 }
 
+/** Отображает шаг сопоставления столбцов. */
 export function ColumnMappingStep({
   headers,
   initialMapping,

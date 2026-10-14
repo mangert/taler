@@ -1,3 +1,4 @@
+/** Обрабатывает HTTP-запросы для работы с журналом аудита. */
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -21,8 +22,10 @@ import { ListAuditLogQueryDto } from './dto/list-audit-log-query.dto.js';
 @UseGuards(JwtAuthGuard)
 @Controller('audit-log')
 export class AuditController {
+  /** Получает зависимости для работы класса. */
   constructor(private readonly audit: AuditQueryService) {}
 
+  /** Возвращает список записей аудита. */
   @Get()
   @ApiOperation({ summary: 'List current user audit entries' })
   @ApiOkResponse({ type: AuditLogListResponseDto })

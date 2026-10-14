@@ -1,3 +1,4 @@
+/** Преобразует срок действия JWT. */
 const durationPattern = /^([1-9]\d*)(ms|s|m|h|d|w)$/;
 const millisecondsByUnit = {
   ms: 1,
@@ -8,6 +9,7 @@ const millisecondsByUnit = {
   w: 604_800_000,
 } as const;
 
+/** Переводит срок действия JWT в секунды. */
 export function jwtDurationToSeconds(value: string): number {
   const match = durationPattern.exec(value);
 

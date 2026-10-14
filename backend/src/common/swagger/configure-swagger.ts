@@ -1,6 +1,8 @@
+/** Настраивает описание и страницу OpenAPI. */
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+/** Настраивает документацию OpenAPI. */
 export function configureSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
     .setTitle('Taler API')

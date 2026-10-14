@@ -1,3 +1,4 @@
+/** Описывает поля обновления бюджета для API. */
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsUUID, Matches, ValidateIf } from 'class-validator';
 import {
@@ -5,6 +6,7 @@ import {
   budgetMonthPattern,
 } from './create-budget.dto.js';
 
+/** Проверяет, что значение передано. */
 const provided = (_object: object, value: unknown): boolean =>
   value !== undefined;
 

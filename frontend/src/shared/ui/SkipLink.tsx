@@ -1,5 +1,7 @@
+/** Содержит общий UI-компонент: ссылку пропуска навигации. */
 import { Box } from '@mui/material';
 
+/** Отображает ссылку пропуска навигации. */
 export function SkipLink() {
   return (
     <Box

@@ -1,3 +1,4 @@
+/** Собирает страницу журнала аудита. */
 import {
   Alert,
   Box,
@@ -28,6 +29,7 @@ import { EmptyState, ErrorState, PageSkeleton } from '../shared/ui/PageStates';
 
 const pageSize = 20;
 
+/** Читает параметры фильтрации из URL. */
 function readParams(searchParams: URLSearchParams): AuditListParams {
   const entityType = searchParams.get('entityType');
   const action = searchParams.get('action');
@@ -46,6 +48,7 @@ function readParams(searchParams: URLSearchParams): AuditListParams {
   };
 }
 
+/** Отображает страницу журнала аудита. */
 export function AuditLogPage() {
   const { user } = useAuth();
   const userId = user?.id ?? '';
@@ -62,6 +65,7 @@ export function AuditLogPage() {
     enabled: Boolean(userId),
   });
 
+  /** Обновляет фильтр и URL страницы. */
   const updateFilter = (key: AuditFilterKey, value: string): void => {
     const next = new URLSearchParams(searchParams);
     if (value) next.set(key, value);
@@ -70,6 +74,7 @@ export function AuditLogPage() {
     setSearchParams(next, { replace: true });
   };
 
+  /** Обновляет номер страницы в URL. */
   const updatePage = (page: number): void => {
     const next = new URLSearchParams(searchParams);
     if (page === 1) next.delete('page');

@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с повторяющимися операциями: список повторяющихся операций. */
 import { Stack, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import type { RecurringRule } from '../../shared/api/recurring-transactions';
@@ -15,6 +16,7 @@ interface RecurringRuleListProps {
   togglingId: string | null;
 }
 
+/** Отображает список повторяющихся операций. */
 export function RecurringRuleList({
   rules,
   categoryNames,

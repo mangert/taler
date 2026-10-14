@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с транзакциями: подтверждение удаления транзакции. */
 import type { Transaction } from '../../shared/api/transactions';
 import { ConfirmDialog } from '../../shared/ui/ConfirmDialog';
 
@@ -7,6 +8,7 @@ interface DeleteTransactionDialogProps {
   onConfirm(transaction: Transaction): Promise<void>;
 }
 
+/** Отображает подтверждение удаления транзакции. */
 export function DeleteTransactionDialog({
   transaction,
   onClose,

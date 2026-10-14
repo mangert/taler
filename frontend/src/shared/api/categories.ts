@@ -1,3 +1,4 @@
+/** Описывает клиентские запросы к API категорий. */
 import type { components } from './schema';
 import { apiRequest } from './http';
 
@@ -12,11 +13,13 @@ export interface CategoryListParams {
   pageSize: number;
 }
 
+/** Формирует адрес API для категории. */
 function categoryUrl(id: string): string {
   return `/api/v1/categories/${encodeURIComponent(id)}`;
 }
 
 export const categoriesApi = {
+  /** Загружает список категорий из API. */
   list: (params: CategoryListParams): Promise<CategoryList> => {
     const query = new URLSearchParams({
       page: String(params.page),
@@ -25,6 +28,7 @@ export const categoriesApi = {
     if (params.search) query.set('search', params.search);
     return apiRequest<CategoryList>(`/api/v1/categories?${query.toString()}`);
   },
+  /** Загружает все категории из API. */
   listAll: async (): Promise<Category[]> => {
     const first = await categoriesApi.list({
       search: '',
@@ -42,16 +46,19 @@ export const categoriesApi = {
     }
     return items;
   },
+  /** Создаёт категорию через API. */
   create: (input: CreateCategoryInput): Promise<Category> =>
     apiRequest<Category>('/api/v1/categories', {
       method: 'POST',
       body: JSON.stringify(input),
     }),
+  /** Обновляет категорию через API. */
   update: (id: string, input: UpdateCategoryInput): Promise<Category> =>
     apiRequest<Category>(categoryUrl(id), {
       method: 'PATCH',
       body: JSON.stringify(input),
     }),
+  /** Удаляет категорию через API. */
   remove: (id: string): Promise<void> =>
     apiRequest<void>(categoryUrl(id), { method: 'DELETE' }),
 };

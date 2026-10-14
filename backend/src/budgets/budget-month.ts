@@ -1,7 +1,10 @@
+/** Вычисляет календарные месяцы для бюджетов. */
+/** Возвращает следующий бюджетный месяц. */
 export function nextBudgetMonth(month: Date): Date {
   return new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + 1, 1));
 }
 
+/** Определяет текущий бюджетный месяц. */
 export function currentBudgetMonth(now: Date, timeZone: string): Date {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone,

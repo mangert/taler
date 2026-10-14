@@ -1,3 +1,4 @@
+/** Обрабатывает HTTP-запросы для работы с бюджетами. */
 import {
   Body,
   Controller,
@@ -43,8 +44,10 @@ import { UpdateBudgetDto } from './dto/update-budget.dto.js';
 @UseGuards(JwtAuthGuard)
 @Controller('budgets')
 export class BudgetsController {
+  /** Получает зависимости для работы класса. */
   constructor(private readonly budgets: BudgetsService) {}
 
+  /** Возвращает список бюджетов. */
   @Get()
   @ApiOperation({ summary: 'List owned budgets for a calendar month' })
   @ApiOkResponse({ type: BudgetListResponseDto })
@@ -56,6 +59,7 @@ export class BudgetsController {
     return this.budgets.list(user.id, query);
   }
 
+  /** Создаёт бюджет. */
   @Post()
   @ApiOperation({ summary: 'Create an owned monthly expense budget' })
   @ApiCreatedResponse({ type: BudgetResponseDto })
@@ -69,6 +73,7 @@ export class BudgetsController {
     return this.budgets.create(user.id, body);
   }
 
+  /** Возвращает бюджет. */
   @Get(':id')
   @ApiOperation({ summary: 'Get an owned budget with current progress' })
   @ApiOkResponse({ type: BudgetResponseDto })
@@ -80,6 +85,7 @@ export class BudgetsController {
     return this.budgets.get(user.id, id);
   }
 
+  /** Обновляет бюджет. */
   @Patch(':id')
   @ApiOperation({ summary: 'Update an owned monthly budget' })
   @ApiOkResponse({ type: BudgetResponseDto })
@@ -94,6 +100,7 @@ export class BudgetsController {
     return this.budgets.update(user.id, id, body);
   }
 
+  /** Удаляет бюджет. */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete an owned monthly budget' })

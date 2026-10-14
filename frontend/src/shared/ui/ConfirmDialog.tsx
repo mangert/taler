@@ -1,3 +1,4 @@
+/** Содержит общий UI-компонент: диалог подтверждения. */
 import {
   Alert,
   Button,
@@ -21,6 +22,7 @@ interface ConfirmDialogProps {
   onConfirm(): Promise<void>;
 }
 
+/** Отображает диалог подтверждения. */
 export function ConfirmDialog({
   open,
   title,
@@ -36,10 +38,12 @@ export function ConfirmDialog({
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  /** Закрывает диалог или меню. */
   const close = (): void => {
     setError(null);
     onClose();
   };
+  /** Подтверждает выбранное действие. */
   const confirm = async (): Promise<void> => {
     setIsPending(true);
     setError(null);

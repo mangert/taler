@@ -1,3 +1,4 @@
+/** Описывает клиентские запросы к API повторяющихся операций. */
 import type { components } from './schema';
 import { apiRequest } from './http';
 
@@ -15,11 +16,13 @@ export interface RecurringRuleListParams {
   pageSize: number;
 }
 
+/** Формирует адрес API для правила. */
 function ruleUrl(id: string): string {
   return `/api/v1/recurring-transactions/${encodeURIComponent(id)}`;
 }
 
 export const recurringRulesApi = {
+  /** Загружает список повторяющихся операций из API. */
   list: (params: RecurringRuleListParams): Promise<RecurringRuleList> => {
     const query = new URLSearchParams({
       page: String(params.page),
@@ -29,11 +32,13 @@ export const recurringRulesApi = {
       `/api/v1/recurring-transactions?${query.toString()}`,
     );
   },
+  /** Создаёт правило через API. */
   create: (input: CreateRecurringRuleInput): Promise<RecurringRule> =>
     apiRequest<RecurringRule>('/api/v1/recurring-transactions', {
       method: 'POST',
       body: JSON.stringify(input),
     }),
+  /** Обновляет правило через API. */
   update: (
     id: string,
     input: UpdateRecurringRuleInput,
@@ -42,6 +47,7 @@ export const recurringRulesApi = {
       method: 'PATCH',
       body: JSON.stringify(input),
     }),
+  /** Удаляет правило через API. */
   remove: (id: string): Promise<void> =>
     apiRequest<void>(ruleUrl(id), { method: 'DELETE' }),
 };

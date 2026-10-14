@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с транзакциями: таблицу транзакций. */
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import {
@@ -24,6 +25,7 @@ interface TransactionsTableProps {
   onDelete(transaction: Transaction): void;
 }
 
+/** Отображает таблицу транзакций. */
 export function TransactionsTable({
   transactions,
   categoryNames,

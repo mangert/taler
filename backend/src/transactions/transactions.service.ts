@@ -1,3 +1,4 @@
+/** Реализует операции с транзакциями. */
 import {
   BadRequestException,
   Injectable,
@@ -26,6 +27,7 @@ import {
   createDefaultTransactionOrderBy,
 } from './transaction-query.builder.js';
 
+/** Преобразует запись базы данных в ответ API. */
 function toResponse(record: Transaction): TransactionResponseDto {
   return {
     id: record.id,
@@ -42,6 +44,7 @@ function toResponse(record: Transaction): TransactionResponseDto {
   };
 }
 
+/** Проверяет и преобразует дату транзакции. */
 function dateValue(value: string): Date {
   const date = new Date(value + 'T00:00:00.000Z');
   if (
@@ -57,6 +60,7 @@ function dateValue(value: string): Date {
   return date;
 }
 
+/** Проверяет положительное числовое значение. */
 function positive(value: string, field: string): Prisma.Decimal {
   const decimal = new Prisma.Decimal(value);
   if (!decimal.isFinite() || decimal.lte(0)) {
@@ -70,11 +74,13 @@ function positive(value: string, field: string): Prisma.Decimal {
 
 @Injectable()
 export class TransactionsService {
+  /** Получает зависимости для работы класса. */
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
   ) {}
 
+  /** Возвращает список транзакций. */
   async list(
     userId: string,
     query: ListTransactionsQueryDto,
@@ -97,10 +103,12 @@ export class TransactionsService {
     };
   }
 
+  /** Возвращает транзакцию. */
   async get(userId: string, id: string): Promise<TransactionResponseDto> {
     return toResponse(await this.getOwned(userId, id));
   }
 
+  /** Создаёт транзакцию. */
   async create(
     userId: string,
     dto: CreateTransactionDto,
@@ -136,6 +144,7 @@ export class TransactionsService {
     });
   }
 
+  /** Обновляет транзакцию. */
   async update(
     userId: string,
     id: string,
@@ -199,6 +208,7 @@ export class TransactionsService {
     }
   }
 
+  /** Удаляет транзакцию. */
   async remove(userId: string, id: string): Promise<void> {
     try {
       await this.prisma.$transaction(async (transaction) => {
@@ -222,6 +232,7 @@ export class TransactionsService {
     }
   }
 
+  /** Проверяет и преобразует денежную сумму. */
   private money(
     amountInput: string,
     currency: string,
@@ -246,6 +257,7 @@ export class TransactionsService {
     return { amount, currency, exchangeRateToBase, baseAmount };
   }
 
+  /** Возвращает базовую валюту пользователя. */
   private async getBaseCurrency(
     userId: string,
     client: Prisma.TransactionClient = this.prisma,
@@ -262,6 +274,7 @@ export class TransactionsService {
     return user.baseCurrency;
   }
 
+  /** Проверяет категорию пользователя. */
   private async assertCategory(
     userId: string,
     id: string,
@@ -284,6 +297,7 @@ export class TransactionsService {
     }
   }
 
+  /** Находит запись текущего пользователя. */
   private async getOwned(
     userId: string,
     id: string,
@@ -296,6 +310,7 @@ export class TransactionsService {
     return record;
   }
 
+  /** Создаёт ответ об отсутствующей записи. */
   private notFound(): never {
     throw new NotFoundException({
       code: 'TRANSACTION_NOT_FOUND',

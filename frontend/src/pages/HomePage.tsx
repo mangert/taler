@@ -1,8 +1,10 @@
+/** Собирает главную страницу. */
 import { Container, Stack } from '@mui/material';
 import { useAuth } from '../features/auth/auth-context';
 import { PageHeader } from '../shared/ui/PageHeader';
 import { DashboardPage } from './DashboardPage';
 
+/** Отображает главную страницу. */
 export function HomePage() {
   const { user } = useAuth();
 

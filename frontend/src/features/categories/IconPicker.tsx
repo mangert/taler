@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с категориями: выбор значка. */
 import { MenuItem, TextField } from '@mui/material';
 
 const iconOptions = [
@@ -22,6 +23,7 @@ interface IconPickerProps {
   error?: string;
 }
 
+/** Отображает выбор значка. */
 export function IconPicker({ value, onChange, error }: IconPickerProps) {
   const hasCustomValue =
     value && !iconOptions.some((option) => option.value === value);

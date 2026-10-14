@@ -1,8 +1,10 @@
+/** Проверяет данные форм для работы с транзакциями. */
 import { z } from 'zod';
 
 const amountPattern = /^(?:0|[1-9]\d{0,14})(?:\.\d{1,4})?$/;
 const ratePattern = /^(?:0|[1-9]\d{0,11})(?:\.\d{1,8})?$/;
 
+/** Проверяет корректность календарной даты. */
 function isValidDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const date = new Date(`${value}T00:00:00.000Z`);
@@ -11,6 +13,7 @@ function isValidDate(value: string): boolean {
   );
 }
 
+/** Создаёт схему формы транзакции. */
 export function createTransactionSchema(baseCurrency: string) {
   return z
     .object({

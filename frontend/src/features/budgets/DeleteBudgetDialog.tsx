@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с бюджетами: подтверждение удаления бюджета. */
 import type { Budget } from '../../shared/api/budgets';
 import { ConfirmDialog } from '../../shared/ui/ConfirmDialog';
 
@@ -8,6 +9,7 @@ interface DeleteBudgetDialogProps {
   onConfirm(budget: Budget): Promise<void>;
 }
 
+/** Отображает подтверждение удаления бюджета. */
 export function DeleteBudgetDialog({
   budget,
   categoryName,

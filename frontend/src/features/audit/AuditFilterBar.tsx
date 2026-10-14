@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с журналом аудита: фильтры журнала аудита. */
 import { Button, MenuItem, Stack, TextField } from '@mui/material';
 import type { AuditListParams } from '../../shared/api/audit';
 
@@ -9,6 +10,7 @@ interface AuditFilterBarProps {
   onReset(): void;
 }
 
+/** Отображает фильтры журнала аудита. */
 export function AuditFilterBar({
   filters,
   onChange,

@@ -1,3 +1,4 @@
+/** Описывает маршруты приложения. */
 import { Box } from '@mui/material';
 import { lazy, Suspense } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
@@ -60,6 +61,7 @@ const TransactionsPage = lazy(() =>
   })),
 );
 
+/** Отображает границу ошибок маршрута. */
 function RouteBoundary() {
   const location = useLocation();
 
@@ -78,6 +80,7 @@ function RouteBoundary() {
   );
 }
 
+/** Отображает маршруты приложения. */
 export function AppRouter() {
   return (
     <Routes>

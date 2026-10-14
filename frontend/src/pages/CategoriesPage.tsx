@@ -1,3 +1,4 @@
+/** Собирает страницу категорий. */
 import {
   Button,
   Container,
@@ -22,11 +23,13 @@ import { EmptyState, ErrorState, PageSkeleton } from '../shared/ui/PageStates';
 
 const pageSize = 20;
 
+/** Разбирает номер страницы из URL. */
 function parsePage(value: string | null): number {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : 1;
 }
 
+/** Отображает страницу категорий. */
 export function CategoriesPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -51,6 +54,7 @@ export function CategoriesPage() {
   });
   const deleteCategory = useMutation({ mutationFn: categoriesApi.remove });
 
+  /** Сохраняет созданную или изменённую категорию. */
   const saveCategory = async (values: CategoryFormValues): Promise<void> => {
     if (editingCategory) {
       await updateCategory.mutateAsync({ id: editingCategory.id, values });
@@ -62,22 +66,26 @@ export function CategoriesPage() {
     setEditingCategory(null);
   };
 
+  /** Открывает форму создания записи. */
   const openCreate = (): void => {
     setEditingCategory(null);
     setFormOpen(true);
   };
 
+  /** Открывает форму редактирования записи. */
   const openEdit = (category: Category): void => {
     setEditingCategory(category);
     setFormOpen(true);
   };
 
+  /** Подтверждает удаление выбранной записи. */
   const confirmDelete = async (category: Category): Promise<void> => {
     await deleteCategory.mutateAsync(category.id);
     await invalidateCategoryDependents(queryClient, userId);
     setDeletingCategory(null);
   };
 
+  /** Обновляет поисковый запрос в URL. */
   const updateSearch = (value: string): void => {
     const next = new URLSearchParams(searchParams);
     if (value) next.set('search', value);
@@ -86,6 +94,7 @@ export function CategoriesPage() {
     setSearchParams(next, { replace: true });
   };
 
+  /** Обновляет номер страницы в URL. */
   const updatePage = (nextPage: number): void => {
     const next = new URLSearchParams(searchParams);
     if (nextPage === 1) next.delete('page');

@@ -1,3 +1,4 @@
+/** Предоставляет типы и хук контекста сессии. */
 import { createContext, useContext } from 'react';
 import type {
   LoginInput,
@@ -21,6 +22,7 @@ export interface AuthContextValue {
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
+/** Предоставляет текущую сессию компоненту. */
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
 

@@ -1,3 +1,4 @@
+/** Описывает данные финансовой сводки для API. */
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, type TransformFnParams } from 'class-transformer';
 import { IsInt, IsOptional, Max, Min } from 'class-validator';

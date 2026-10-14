@@ -1,3 +1,4 @@
+/** Строит условия фильтрации и сортировки транзакций. */
 import { BadRequestException } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client.js';
 import { SortDirection } from '../common/enums/sort-direction.enum.js';
@@ -36,6 +37,7 @@ export type TransactionOrderBy = [
   { id: SortDirection.DESC },
 ];
 
+/** Формирует условия фильтрации транзакций. */
 export function buildTransactionWhere(
   userId: string,
   filters: Readonly<TransactionFilters>,
@@ -75,10 +77,12 @@ export function buildTransactionWhere(
   return where;
 }
 
+/** Задаёт порядок транзакций по умолчанию. */
 export function createDefaultTransactionOrderBy(): TransactionOrderBy {
   return [{ transactionDate: SortDirection.DESC }, { id: SortDirection.DESC }];
 }
 
+/** Разбирает дату фильтра транзакций. */
 function parseDate(value: string): Date {
   const date = new Date(value + 'T00:00:00.000Z');
   if (
@@ -94,6 +98,7 @@ function parseDate(value: string): Date {
   return date;
 }
 
+/** Переводит фильтры транзакций в условия Prisma. */
 export function buildTransactionPrismaWhere(
   userId: string,
   filters: Readonly<TransactionFilters>,

@@ -1,3 +1,4 @@
+/** Описывает ответ API с данными бюджета. */
 import { ApiProperty } from '@nestjs/swagger';
 
 export class BudgetResponseDto {

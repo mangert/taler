@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с категориями: сетку категорий. */
 import { Box } from '@mui/material';
 import type { Category } from '../../shared/api/categories';
 import { CategoryCard } from './CategoryCard';
@@ -8,6 +9,7 @@ interface CategoryGridProps {
   onDelete(category: Category): void;
 }
 
+/** Отображает сетку категорий. */
 export function CategoryGrid({
   categories,
   onEdit,

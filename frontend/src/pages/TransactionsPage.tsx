@@ -1,3 +1,4 @@
+/** Собирает страницу транзакций. */
 import {
   Alert,
   Box,
@@ -42,11 +43,13 @@ import {
 
 const pageSize = 20;
 
+/** Разбирает номер страницы из URL. */
 function parsePage(value: string | null): number {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : 1;
 }
 
+/** Читает параметры фильтрации из URL. */
 function readParams(searchParams: URLSearchParams): TransactionListParams {
   const type = searchParams.get('type');
   return {
@@ -62,6 +65,7 @@ function readParams(searchParams: URLSearchParams): TransactionListParams {
   };
 }
 
+/** Отображает страницу транзакций. */
 export function TransactionsPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -113,6 +117,7 @@ export function TransactionsPage() {
     }) => transactionsApi.update(id, values),
   });
   const deleteTransaction = useMutation({ mutationFn: transactionsApi.remove });
+  /** Сохраняет созданную или изменённую транзакцию. */
   const saveTransaction = async (
     values: TransactionFormValues,
   ): Promise<void> => {
@@ -134,10 +139,12 @@ export function TransactionsPage() {
     setFormOpen(false);
     setEditingTransaction(null);
   };
+  /** Открывает форму редактирования записи. */
   const openEdit = (transaction: Transaction): void => {
     setEditingTransaction(transaction);
     setFormOpen(true);
   };
+  /** Подтверждает удаление выбранной записи. */
   const confirmDelete = async (transaction: Transaction): Promise<void> => {
     await deleteTransaction.mutateAsync(transaction.id);
     await Promise.all([
@@ -149,6 +156,7 @@ export function TransactionsPage() {
     setDeletingTransaction(null);
   };
 
+  /** Обновляет фильтр и URL страницы. */
   const updateFilter = (key: TransactionFilterKey, value: string): void => {
     const next = new URLSearchParams(searchParams);
     if (value) next.set(key, value);
@@ -157,6 +165,7 @@ export function TransactionsPage() {
     setSearchParams(next, { replace: true });
   };
 
+  /** Обновляет номер страницы в URL. */
   const updatePage = (page: number): void => {
     const next = new URLSearchParams(searchParams);
     if (page === 1) next.delete('page');

@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с бюджетами: карточку бюджета. */
 import {
   Button,
   Card,
@@ -17,10 +18,12 @@ interface BudgetCardProps {
   onDelete(budget: Budget): void;
 }
 
+/** Проверяет и преобразует денежную сумму. */
 function money(amount: string, currency: string): string {
   return `${amount} ${currency}`;
 }
 
+/** Отображает карточку бюджета. */
 export function BudgetCard({
   budget,
   categoryName,

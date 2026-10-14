@@ -1,3 +1,4 @@
+/** Собирает страницу повторяющихся операций. */
 import {
   Alert,
   Button,
@@ -25,11 +26,13 @@ import { EmptyState, ErrorState, PageSkeleton } from '../shared/ui/PageStates';
 
 const pageSize = 20;
 
+/** Разбирает номер страницы из URL. */
 function parsePage(value: string | null): number {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : 1;
 }
 
+/** Отображает страницу повторяющихся операций. */
 export function RecurringTransactionsPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -70,11 +73,13 @@ export function RecurringTransactionsPage() {
       recurringRulesApi.update(id, { isActive }),
   });
 
+  /** Обновляет списки повторяющихся операций. */
   const refreshRules = async (): Promise<void> => {
     await queryClient.invalidateQueries({
       queryKey: recurringRuleKeys.all(userId),
     });
   };
+  /** Сохраняет правило повторяющейся операции. */
   const saveRule = async (values: RecurringRuleFormValues): Promise<void> => {
     const input: CreateRecurringRuleInput = {
       categoryId: values.categoryId,
@@ -97,6 +102,7 @@ export function RecurringTransactionsPage() {
     setFormOpen(false);
     setEditingRule(null);
   };
+  /** Включает или приостанавливает правило. */
   const toggleRule = async (rule: RecurringRule): Promise<void> => {
     setToggleError(null);
     try {
@@ -111,6 +117,7 @@ export function RecurringTransactionsPage() {
       );
     }
   };
+  /** Подтверждает удаление выбранной записи. */
   const confirmDelete = async (rule: RecurringRule): Promise<void> => {
     await deleteRule.mutateAsync(rule.id);
     await refreshRules();
@@ -118,6 +125,7 @@ export function RecurringTransactionsPage() {
     if (page > 1 && rulesQuery.data?.items.length === 1) changePage(page - 1);
   };
 
+  /** Переключает страницу списка. */
   const changePage = (nextPage: number): void => {
     const next = new URLSearchParams(searchParams);
     if (nextPage === 1) next.delete('page');

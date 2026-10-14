@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с импортом транзакций: этапы импорта CSV. */
 import { Box, Typography } from '@mui/material';
 
 const steps = [
@@ -13,6 +14,7 @@ interface ImportStepperProps {
   currentStep: ImportStep;
 }
 
+/** Отображает этапы импорта CSV. */
 export function ImportStepper({ currentStep }: ImportStepperProps) {
   return (
     <Box component="nav" aria-label="Этапы импорта">

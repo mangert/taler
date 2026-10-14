@@ -1,8 +1,10 @@
+/** Записывает сведения о HTTP-запросах. */
 import { Logger, LoggerService } from '@nestjs/common';
 import { RequestHandler } from 'express';
 
 type RequestLogger = Pick<LoggerService, 'log'>;
 
+/** Создаёт middleware для журнала HTTP-запросов. */
 export function createRequestLoggingMiddleware(
   logger: RequestLogger = new Logger('HTTP'),
 ): RequestHandler {

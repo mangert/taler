@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с импортом транзакций: предпросмотр импорта. */
 import {
   Alert,
   Button,
@@ -19,6 +20,7 @@ interface ImportPreviewProps {
   onImport: () => void;
 }
 
+/** Отображает предпросмотр импорта. */
 export function ImportPreview({
   sample,
   pending,

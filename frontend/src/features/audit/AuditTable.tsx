@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с журналом аудита: таблицу журнала аудита. */
 import {
   Button,
   Paper,
@@ -23,6 +24,7 @@ interface AuditTableProps {
   onDetails(entry: AuditEntry): void;
 }
 
+/** Отображает таблицу журнала аудита. */
 export function AuditTable({ entries, timeZone, onDetails }: AuditTableProps) {
   return (
     <TableContainer component={Paper} variant="outlined">

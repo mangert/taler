@@ -1,3 +1,4 @@
+/** Формирует метаданные списков с пагинацией. */
 import { MAX_PAGE_SIZE } from '../constants/pagination.constants.js';
 import { PaginatedMetaDto } from '../dto/paginated-meta.dto.js';
 
@@ -9,6 +10,7 @@ export interface Pagination {
   meta: PaginatedMeta;
 }
 
+/** Формирует метаданные пагинации. */
 export function createPagination(
   page: number,
   pageSize: number,

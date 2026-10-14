@@ -1,3 +1,4 @@
+/** Содержит компонент для работы с импортом транзакций: результат импорта. */
 import { Alert, Button, Stack, Typography } from '@mui/material';
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
@@ -10,6 +11,7 @@ interface RowError {
   message: string;
 }
 
+/** Определяет ошибку строки импорта. */
 function isRowError(value: unknown): value is RowError {
   return (
     typeof value === 'object' &&
@@ -30,6 +32,7 @@ interface ImportResultProps {
   onRestart: () => void;
 }
 
+/** Отображает результат импорта. */
 export function ImportResult({
   result,
   error,

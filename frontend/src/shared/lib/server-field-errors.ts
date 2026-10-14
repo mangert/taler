@@ -1,6 +1,8 @@
+/** Переносит ошибки API в поля формы. */
 import type { FieldPath, FieldValues, UseFormSetError } from 'react-hook-form';
 import { ApiError } from '../api/http';
 
+/** Переносит ошибки API в поля формы. */
 export function applyServerFieldErrors<TValues extends FieldValues>(
   error: unknown,
   fields: readonly FieldPath<TValues>[],
